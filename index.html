@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Parker Jones</title>
+  <meta name="description" content="Projects and experience of Parker Jones, Electrical & Computer Engineering and Computer Science student at Duke University.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#projects">Skip to projects</a>
+
+  <header class="topbar">
+    <a class="topbar-name" href="#top" id="nav-name"></a>
+    <nav aria-label="Sections">
+      <a href="#projects">Projects</a>
+      <a href="#experience">Experience</a>
+      <a href="#skills">Skills</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <h1 id="name"></h1>
+      <p class="headline" id="headline"></p>
+      <p class="intro" id="intro"></p>
+      <div class="contact-row" id="contact-row"></div>
+    </section>
+
+    <section class="edu" aria-label="Education" id="education"></section>
+
+    <section class="projects" id="projects" aria-labelledby="projects-h">
+      <div class="section-head">
+        <h2 id="projects-h">Projects</h2>
+        <div class="filters" id="filters" role="group" aria-label="Filter projects"></div>
+      </div>
+      <ol class="trace" id="project-list"></ol>
+      <p class="empty" id="empty" hidden>No projects match that filter yet.</p>
+    </section>
+
+    <section class="experience" id="experience" aria-labelledby="exp-h">
+      <div class="section-head"><h2 id="exp-h">Work &amp; leadership</h2></div>
+      <div class="exp-grid" id="experience-list"></div>
+    </section>
+
+    <section class="skills" id="skills" aria-labelledby="skills-h">
+      <div class="section-head"><h2 id="skills-h">Skills</h2></div>
+      <dl class="skill-grid" id="skill-list"></dl>
+    </section>
+  </main>
+
+  <footer class="footer" id="contact">
+    <p class="footer-lead">Want to talk about an internship?</p>
+    <div class="contact-row" id="contact-row-footer"></div>
+    <p class="footer-small" id="footer-small"></p>
+  </footer>
+
+  <script src="content.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
