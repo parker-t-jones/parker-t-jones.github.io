@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Parker Jones</title>
+  <meta name="description" content="Parker Jones: Electrical & Computer Engineering and Computer Science at Duke. Embedded systems, firmware, hardware and software projects.">
+  <meta name="theme-color" content="#f4f6f4" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1a17" media="(prefers-color-scheme: dark)">
+
+  <!-- Link previews (iMessage, Slack, LinkedIn, email) -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://parker-t-jones.github.io/">
+  <meta property="og:title" content="Parker Jones">
+  <meta property="og:description" content="ECE + Computer Science at Duke. Embedded systems, firmware, hardware and software projects.">
+  <meta property="og:image" content="https://parker-t-jones.github.io/images/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#work">Skip to projects</a>
+
+  <header class="topbar">
+    <a class="topbar-name" href="#top" id="nav-name"></a>
+    <nav aria-label="Sections">
+      <a href="#work">Projects</a>
+      <a href="#experience">Experience</a>
+      <a href="#skills">Skills</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <h1 id="name"></h1>
+      <p class="headline" id="headline"></p>
+      <p class="intro" id="intro"></p>
+      <p class="availability" id="availability"></p>
+      <div class="contact-row" id="contact-row"></div>
+    </section>
+
+    <section class="edu" aria-label="Education" id="education"></section>
+
+    <section class="work" id="work" aria-labelledby="work-h">
+      <div class="section-head"><h2 id="work-h">Selected work</h2></div>
+      <ol class="trace" id="work-list"></ol>
+    </section>
+
+    <section class="more" id="more" aria-labelledby="more-h">
+      <div class="section-head"><h2 id="more-h">More projects</h2></div>
+      <div class="cards" id="more-list"></div>
+    </section>
+
+    <section class="experience" id="experience" aria-labelledby="exp-h">
+      <div class="section-head"><h2 id="exp-h">Work &amp; leadership</h2></div>
+      <div class="exp-grid" id="experience-list"></div>
+    </section>
+
+    <section class="skills" id="skills" aria-labelledby="skills-h">
+      <div class="section-head"><h2 id="skills-h">Skills</h2></div>
+      <dl class="skill-grid" id="skill-list"></dl>
+    </section>
+  </main>
+
+  <footer class="footer" id="contact">
+    <p class="footer-lead">Want to talk about an internship?</p>
+    <div class="contact-row" id="contact-row-footer"></div>
+    <p class="footer-small" id="footer-small"></p>
+  </footer>
+
+  <script src="content.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
