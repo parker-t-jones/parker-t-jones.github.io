@@ -184,6 +184,13 @@ section.projects, section.experience, section.skills { padding-top: clamp(56px, 
 .img-open:hover img { border-color: var(--trace); }
 .proj-images figcaption { font-size: 13px; color: var(--ink-soft); margin-top: 6px; line-height: 1.4; }
 
+/* Wide group: first image full width, the rest two-up; never cropped */
+.proj-images.wide { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+.proj-images.wide figure:first-child { grid-column: 1 / -1; }
+.proj-images.wide.one { grid-template-columns: minmax(0, 1fr); }
+.proj-images.wide img { aspect-ratio: auto; object-fit: contain; }
+.proj-images + .proj-images { margin-top: 16px; }
+
 /* Phone screenshots: show the whole screen, never crop it */
 .proj-images.phone { grid-template-columns: repeat(auto-fill, minmax(150px, 190px)); gap: 16px; }
 .proj-images.phone img { aspect-ratio: auto; object-fit: contain; border-radius: 18px; background: #000; }

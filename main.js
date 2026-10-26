@@ -74,6 +74,31 @@
     );
   }
 
+  /* ---------- Image galleries ----------
+     Each image can set kind: "phone" (tall screenshot, shown uncropped in a row).
+     Everything else is "wide" (photos, desktop screenshots). A project with both
+     gets a wide group first, then a phone row. Older content that sets
+     imageLayout: "phone" on the project treats all its images as phone shots. */
+  function figure(img, title) {
+    return el("figure", {},
+      el("button", { type: "button", class: "img-open", "data-full": img.src,
+                     "data-caption": img.caption || img.alt || "",
+                     "aria-label": "View larger: " + (img.alt || title) },
+        el("img", { src: img.src, alt: img.alt || "", loading: "lazy", decoding: "async" })),
+      img.caption ? el("figcaption", { text: img.caption }) : null);
+  }
+  function gallery(p, images) {
+    if (!images.length) return [];
+    const isPhone = (img) => img.kind === "phone" || (!img.kind && p.imageLayout === "phone");
+    const wide = images.filter((i) => !isPhone(i));
+    const phone = images.filter(isPhone);
+    const out = [];
+    if (wide.length) out.push(el("div", { class: "proj-images wide" + (wide.length === 1 ? " one" : "") },
+      wide.map((i) => figure(i, p.title))));
+    if (phone.length) out.push(el("div", { class: "proj-images phone" }, phone.map((i) => figure(i, p.title))));
+    return out;
+  }
+
   /* ---------- Projects ---------- */
   const list = $("project-list");
   const cards = [];
@@ -91,18 +116,7 @@
       el("h3", { class: "proj-title", text: p.title }),
       p.subtitle ? el("p", { class: "proj-sub", text: p.subtitle }) : null,
       p.summary ? el("p", { class: "proj-summary", text: p.summary }) : null,
-      images.length
-        ? el("div", {
-              class: "proj-images" + (p.imageLayout === "phone" ? " phone" : "") + (images.length === 1 ? " one" : "")
-            },
-            images.map((img) =>
-              el("figure", {},
-                el("button", { type: "button", class: "img-open", "data-full": img.src,
-                               "data-caption": img.caption || img.alt || "",
-                               "aria-label": "View larger: " + (img.alt || p.title) },
-                  el("img", { src: img.src, alt: img.alt || "", loading: "lazy", decoding: "async" })),
-                img.caption ? el("figcaption", { text: img.caption }) : null)))
-        : null,
+      ...gallery(p, images),
       p.bullets && p.bullets.length
         ? el("details", { class: "proj-details" },
             el("summary", {}, el("span", { class: "open-label" }, "What I did"), el("span", { class: "close-label" }, "Hide details")),

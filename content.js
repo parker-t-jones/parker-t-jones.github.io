@@ -76,11 +76,14 @@ const SITE = {
         { label: "Code on GitHub", url: "https://github.com/parker-t-jones/pivot" },
         { label: "Marketing site code", url: "https://github.com/parker-t-jones/pivot-sports-site" },
       ],
-      imageLayout: "phone",
       images: [
-        { src: "images/pivot-home.webp", alt: "Pivot home screen showing the week's games and the biggest fantasy stake", caption: "Home: the week's slate and your biggest stake" },
-        { src: "images/pivot-board.webp", alt: "Pivot board view listing every game by kickoff time with network", caption: "Board: every game, with the ones that matter to you flagged" },
-        { src: "images/pivot-my-card.webp", alt: "Pivot My Card view listing the user's fantasy players by game", caption: "My Card: your players, grouped by game" },
+        { src: "images/pivot-web-home.webp", alt: "Pivot web app home: the week's games by kickoff window, the top game, and the user's picks", caption: "Web app: the week's slate, the game that matters most, and your picks" },
+        { src: "images/pivot-web-watchlist.webp", alt: "Pivot watchlist table listing each fantasy player with game, network and status", caption: "Watchlist: every player, bet and pool, with where to watch" },
+        { src: "images/pivot-web-add-pick.webp", alt: "Pivot add-a-pick panel choosing a game for a spread bet", caption: "Adding a spread pick" },
+        { src: "images/pivot-ios-board.webp", kind: "phone", alt: "Pivot iOS board showing the top game and the full slate", caption: "iOS: Board" },
+        { src: "images/pivot-ios-my-card.webp", kind: "phone", alt: "Pivot iOS My Card listing fantasy players, pools and bets by game", caption: "iOS: My Card" },
+        { src: "images/pivot-ios-watchlist.webp", kind: "phone", alt: "Pivot iOS watchlist with fantasy starters and kickoff times", caption: "iOS: Watchlist" },
+        { src: "images/pivot-ios-lineup.webp", kind: "phone", alt: "Pivot iOS sheet for switching the active fantasy lineup", caption: "iOS: switching leagues" },
       ],
     },
     {
