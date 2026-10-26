@@ -7,9 +7,14 @@
      the order on the page.
    - To hide something without deleting it, wrap it in /* ... * /
      (no space between * and /).
-   - Images: drop the file in the /images folder, then list it like
-       images: [{ src: "images/pivot-home.png", alt: "Pivot home screen" }]
-   - Links: links: [{ label: "Live demo", url: "https://..." }]
+   - Images: upload the file into the /images folder, then list it like
+       images: [{ src: "images/wristband.jpg", alt: "What the photo shows", caption: "Optional caption" }]
+     Visitors can click any image to see it full size.
+     Phone screenshots (tall, narrow) look best with  imageLayout: "phone"
+     on that project. Photos and wide screenshots need nothing extra.
+     Keep each image under about 500 KB (resize to ~1600px wide first).
+   - Links: links: [{ label: "Code on GitHub", url: "https://..." }]
+     Links show as buttons under the project, in the order you list them.
    - Tags drive the filter buttons. Use any of the names in `filters`.
    ===================================================================== */
 
@@ -67,8 +72,16 @@ const SITE = {
         "Deploy on Supabase (Postgres + Auth) and Vercel with a live shareable build ahead of a public release timed to the NFL season.",
       ],
       stack: ["TypeScript", "React Native (Expo)", "Node.js", "Supabase", "Vercel", "Cloudflare"],
-      links: [],
-      images: [],
+      links: [
+        { label: "Code on GitHub", url: "https://github.com/parker-t-jones/pivot" },
+        { label: "Marketing site code", url: "https://github.com/parker-t-jones/pivot-sports-site" },
+      ],
+      imageLayout: "phone",
+      images: [
+        { src: "images/pivot-home.webp", alt: "Pivot home screen showing the week's games and the biggest fantasy stake", caption: "Home: the week's slate and your biggest stake" },
+        { src: "images/pivot-board.webp", alt: "Pivot board view listing every game by kickoff time with network", caption: "Board: every game, with the ones that matter to you flagged" },
+        { src: "images/pivot-my-card.webp", alt: "Pivot My Card view listing the user's fantasy players by game", caption: "My Card: your players, grouped by game" },
+      ],
     },
     {
       title: "Scissor-Lift Object Detection System",
@@ -87,7 +100,29 @@ const SITE = {
         "Work with the client across multiple semesters, from problem scoping through hardware prototyping.",
       ],
       stack: ["ESP32-S3", "nRF52840 (BLE)", "VL53L8CX ToF", "DRV2605L", "Arduino C++", "I2C", "Fusion 360", "KiCad"],
-      links: [],
+      links: [
+        { label: "Team repo on GitHub", url: "https://github.com/piersonjones704/Scissor-Lift-Project" },
+      ],
+      images: [],
+    },
+    {
+      title: "SafeLifts Simulator",
+      subtitle: "3D construction-site simulator for testing scissor-lift collision sensing",
+      role: "Independent Project",
+      dates: "2026 – Present",
+      tags: ["Software"],
+      summary:
+        "A browser-based 3D simulator for the scissor-lift project: drive a lift through a site, place sensors on it, and see exactly where the blind spots are before building hardware.",
+      bullets: [
+        "Model a drivable scissor lift with adjustable platform height in a 3D construction site with generated obstacles.",
+        "Define sensors by their parameters (Time-of-Flight, radar, or anything describable that way), group them into modules, and mount them anywhere on the lift.",
+        "Run coverage analysis that shows what each sensor configuration sees and misses at any platform height.",
+        "In progress: live sensing and alerts, missed-detection logging, laser guideline projection, and saving configurations to compare side by side.",
+      ],
+      stack: ["TypeScript", "React", "three.js", "Vite", "Vitest"],
+      links: [
+        { label: "Code on GitHub", url: "https://github.com/parker-t-jones/safelifts-sim" },
+      ],
       images: [],
     },
     {
@@ -121,7 +156,9 @@ const SITE = {
         "Build a family leaderboard through a Postgres RPC.",
       ],
       stack: ["React", "Tailwind CSS", "Vite", "Supabase", "Vercel"],
-      links: [],
+      links: [
+        { label: "Code on GitHub", url: "https://github.com/parker-t-jones/WorkoutTracker" },
+      ],
       images: [],
     },
     {
@@ -210,12 +247,13 @@ const SITE = {
   ],
 
   skills: [
-    { group: "Languages", items: ["Python", "C++ (Arduino)", "TypeScript", "JavaScript", "Java", "MATLAB", "SQL", "HTML"] },
+    { group: "Languages", items: ["Python", "C++ (Arduino)", "Java", "MATLAB", "SQL"] },
     { group: "Hardware", items: ["ESP32-S3", "Seeed XIAO nRF52840 Sense (BLE)", "Arduino", "VL53L8CX ToF sensors", "IR/thermal sensors", "DRV2605L haptic driver", "LRA motors", "OLED displays", "Xbee", "KiCad", "Soldering"] },
     { group: "Protocols", items: ["I2C", "UART/serial", "Xbee wireless serial"] },
     { group: "Test equipment", items: ["Oscilloscope", "Multimeter"] },
     { group: "CAD & manufacturing", items: ["Fusion 360 (CAD + CAM)", "SolidWorks", "Onshape", "Prusa Core One FDM printing", "Centroid CNC mill"] },
     { group: "Software & web", items: ["React", "React Native (Expo)", "Node.js", "REST APIs", "WebSockets", "Supabase (Postgres, Auth, Edge Functions, RLS)", "Vercel", "Cloudflare", "pnpm workspaces", "Git/GitHub"] },
     { group: "AI-assisted development", items: ["Cursor", "Claude"] },
+    { group: "Office", items: ["Microsoft Office (certified in Word, Excel and PowerPoint)"] },
   ],
 };

@@ -17,9 +17,13 @@ A plain HTML/CSS/JS site. No build step, no frameworks. GitHub Pages serves it a
 Open `content.js` on GitHub (click the file, then the pencil icon), change text, and click **Commit changes**. The live site updates in about a minute.
 
 - **Add a project:** copy a whole `{ ... },` block inside `projects`, paste it, edit it. Position in the list = position on the page.
-- **Add photos:** upload to `images/` (Add file → Upload files), then in that project set
+- **Add photos:** open the `images/` folder on GitHub, click Add file → Upload files, and drop them in. Then in that project set
   `images: [{ src: "images/wristband.jpg", alt: "Haptic wristband prototype", caption: "Optional caption" }]`
-- **Add links:** `links: [{ label: "Live demo", url: "https://..." }, { label: "Code", url: "https://github.com/..." }]`
+  - Keep each file under ~500 KB. Phone photos are often 3–5 MB, so resize to ~1600px wide first (on a Mac: open in Preview → Tools → Adjust Size).
+  - File names are case-sensitive on the live site: `Wristband.JPG` and `wristband.jpg` are different files.
+  - For tall phone screenshots, add `imageLayout: "phone"` to the project so they show uncropped side by side (see Pivot).
+  - Visitors can click any image to see it full size.
+- **Add links:** `links: [{ label: "Code on GitHub", url: "https://github.com/..." }]`. GitHub links get the GitHub icon automatically.
 - **Filter buttons** come from each project's `tags`. A tag only shows as a button if it's listed in `filters` and at least one project uses it.
 - **Resume button:** upload your PDF as `resume.pdf` next to `index.html`, then set `resume: "resume.pdf"` under `contact`.
 

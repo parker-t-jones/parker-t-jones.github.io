@@ -18,6 +18,19 @@
     return node;
   }
 
+  function githubIcon() {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("viewBox", "0 0 16 16");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("class", "gh-icon");
+    const path = document.createElementNS(ns, "path");
+    path.setAttribute("fill", "currentColor");
+    path.setAttribute("d", "M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z");
+    svg.appendChild(path);
+    return svg;
+  }
+
   const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
   /* ---------- Header ---------- */
@@ -79,10 +92,15 @@
       p.subtitle ? el("p", { class: "proj-sub", text: p.subtitle }) : null,
       p.summary ? el("p", { class: "proj-summary", text: p.summary }) : null,
       images.length
-        ? el("div", { class: "proj-images" + (images.length === 1 ? " one" : "") },
+        ? el("div", {
+              class: "proj-images" + (p.imageLayout === "phone" ? " phone" : "") + (images.length === 1 ? " one" : "")
+            },
             images.map((img) =>
               el("figure", {},
-                el("img", { src: img.src, alt: img.alt || "", loading: "lazy" }),
+                el("button", { type: "button", class: "img-open", "data-full": img.src,
+                               "data-caption": img.caption || img.alt || "",
+                               "aria-label": "View larger: " + (img.alt || p.title) },
+                  el("img", { src: img.src, alt: img.alt || "", loading: "lazy", decoding: "async" })),
                 img.caption ? el("figcaption", { text: img.caption }) : null)))
         : null,
       p.bullets && p.bullets.length
@@ -95,7 +113,9 @@
         : null,
       links.length
         ? el("div", { class: "proj-links" },
-            links.map((l) => el("a", { href: l.url, target: "_blank", rel: "noopener" }, l.label || "Link")))
+            links.map((l) => el("a", { class: "proj-link", href: l.url, target: "_blank", rel: "noopener" },
+              /github\.com/i.test(l.url) ? githubIcon() : null,
+              el("span", {}, l.label || "Link"))))
         : null
     );
     cards.push(li);
@@ -140,6 +160,31 @@
       )
     );
   });
+
+  /* ---------- Image viewer ---------- */
+  const viewer = el("dialog", { class: "viewer", "aria-label": "Image viewer" },
+    el("figure", { class: "viewer-fig" },
+      el("img", { class: "viewer-img", alt: "" }),
+      el("figcaption", { class: "viewer-cap" })),
+    el("button", { type: "button", class: "viewer-close", "aria-label": "Close" }, "Close"));
+  document.body.append(viewer);
+  const vImg = viewer.querySelector(".viewer-img");
+  const vCap = viewer.querySelector(".viewer-cap");
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".img-open");
+    if (!btn) return;
+    const thumb = btn.querySelector("img");
+    vImg.src = btn.dataset.full;
+    vImg.alt = thumb ? thumb.alt : "";
+    vCap.textContent = btn.dataset.caption || "";
+    vCap.hidden = !btn.dataset.caption;
+    if (typeof viewer.showModal === "function") viewer.showModal();
+    else window.open(btn.dataset.full, "_blank", "noopener");
+  });
+  viewer.querySelector(".viewer-close").addEventListener("click", () => viewer.close());
+  // click on the dark backdrop (outside the image) closes it
+  viewer.addEventListener("click", (e) => { if (e.target === viewer) viewer.close(); });
 
   /* ---------- Skills ---------- */
   (S.skills || []).forEach((g) => {
