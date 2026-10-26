@@ -5,13 +5,19 @@
    - To add a project, copy one whole { ... } block in `projects`,
      paste it where you want it to appear, and edit it. Order here is
      the order on the page.
+   - featured: true puts a project in "Selected work" as a large case
+     study (keep it to your best 3 to 5). Everything else shows as a
+     compact card under "More projects".
+   - The first 3 bullets show right away on featured projects; any more
+     sit behind "More detail".
    - To hide something without deleting it, wrap it in /* ... * /
      (no space between * and /).
    - Images: upload the file into the /images folder, then list it like
        images: [{ src: "images/wristband.jpg", alt: "What the photo shows", caption: "Optional caption" }]
-     Visitors can click any image to see it full size.
-     Phone screenshots (tall, narrow) look best with  imageLayout: "phone"
-     on that project. Photos and wide screenshots need nothing extra.
+     The first image is the big one on featured projects; the rest show
+     as thumbnails. Visitors can click any image to page through them
+     full size. Mark tall phone screenshots with  kind: "phone"  so they
+     aren't cropped. Photos and wide screenshots need nothing extra.
      Keep each image under about 500 KB (resize to ~1600px wide first).
    - Links: links: [{ label: "Code on GitHub", url: "https://..." }]
      Links show as buttons under the project, in the order you list them.
@@ -24,6 +30,11 @@ const SITE = {
   intro:
     "I build across the whole stack: firmware and sensor hardware, mechanical parts cut on a CNC mill, and the apps and backends that sit on top. Here's what I've made so far.",
   location: "Tampa, FL",
+  // Your photo at the top of the page. Replace the file in /images to change it,
+  // or set src to "" to hide it.
+  photo: { src: "images/parker.jpg", alt: "Parker Jones" },
+  // One line under the intro saying what you're looking for. Leave "" to hide it.
+  availability: "Looking for Summer 2027 internships in embedded systems, firmware, hardware and software.",
 
   contact: {
     email: "parker.t.jones07@gmail.com",
@@ -59,6 +70,7 @@ const SITE = {
   projects: [
     {
       title: "Pivot",
+      featured: true,
       subtitle: "Roster-aware sports viewing app",
       role: "Independent Project",
       dates: "2025 – Present",
@@ -88,6 +100,7 @@ const SITE = {
     },
     {
       title: "Scissor-Lift Object Detection System",
+      featured: true,
       subtitle: "Collision warning for construction scissor lifts, sponsored by Skanska",
       role: "Mechatronics Team Lead, Client-Sponsored Team Project",
       dates: "2025 – Present",
@@ -105,6 +118,44 @@ const SITE = {
       stack: ["ESP32-S3", "nRF52840 (BLE)", "VL53L8CX ToF", "DRV2605L", "Arduino C++", "I2C", "Fusion 360", "KiCad"],
       links: [
         { label: "Team repo on GitHub", url: "https://github.com/piersonjones704/Scissor-Lift-Project" },
+      ],
+      images: [],
+    },
+    {
+      title: "Duke Robotics Club, AUV Team",
+      featured: true,
+      subtitle: "Autonomous underwater vehicles for RoboSub",
+      role: "Student Club Team",
+      dates: "2025 – Present",
+      tags: ["Mechanical", "Hardware"],
+      summary:
+        "Contributing to two autonomous underwater vehicles that compete in RoboSub, where they navigate and complete manipulation tasks on their own.",
+      bullets: [
+        "Design mechanical components in SolidWorks and generate CNC toolpaths in Fusion 360.",
+        "Machine buoyancy blocks on a Centroid CNC mill from self-generated toolpaths.",
+      ],
+      stack: ["SolidWorks", "Fusion 360 CAM", "Centroid CNC mill"],
+      links: [],
+      images: [],
+    },
+    {
+      title: "Workout Tracker",
+      featured: true,
+      subtitle: "Family gym app with an AI programming agent",
+      role: "Independent Project",
+      dates: "2026 – Present",
+      tags: ["Software"],
+      summary:
+        "Generates and schedules workout programs, then adapts each next week to what was actually logged, including injuries and issues.",
+      bullets: [
+        "Run AI program generation as a Supabase Edge Function calling the Anthropic API, keeping the API key server-side instead of in the client bundle.",
+        "Generate each following week from logged RPE, completion and pain flags, with a ranked exercise-substitution catalog and a review queue for AI-proposed substitutions.",
+        "Design the Postgres schema with Row Level Security on every table, tying app users to Supabase auth identities.",
+        "Build a family leaderboard through a Postgres RPC.",
+      ],
+      stack: ["React", "Tailwind CSS", "Vite", "Supabase", "Vercel"],
+      links: [
+        { label: "Code on GitHub", url: "https://github.com/parker-t-jones/WorkoutTracker" },
       ],
       images: [],
     },
@@ -129,39 +180,19 @@ const SITE = {
       images: [],
     },
     {
-      title: "Duke Robotics Club, AUV Team",
-      subtitle: "Autonomous underwater vehicles for RoboSub",
-      role: "Student Club Team",
-      dates: "2025 – Present",
-      tags: ["Mechanical", "Hardware"],
+      title: "Autonomous Line-Following Robot",
+      subtitle: "Line tracking, stop detection and heat-signature search",
+      role: "Team Project",
+      dates: "2026",
+      tags: ["Hardware", "Firmware"],
       summary:
-        "Contributing to two autonomous underwater vehicles that compete in RoboSub, where they navigate and complete manipulation tasks on their own.",
+        "Follows a course, stops at hash marks, and finds a target object by its heat signature.",
       bullets: [
-        "Design mechanical components in SolidWorks and generate CNC toolpaths in Fusion 360.",
-        "Machine buoyancy blocks on a Centroid CNC mill from self-generated toolpaths.",
+        "Built the robot in Arduino C++ to follow a line, detect hash-mark stops, and use an IR thermal sensor to locate a target object's heat signature.",
+        "Programmed it to halt at each hash mark, set an onboard RGB LED to a stop-specific color, and report status over an Xbee wireless link.",
       ],
-      stack: ["SolidWorks", "Fusion 360 CAM", "Centroid CNC mill"],
+      stack: ["Arduino C++", "IR thermal sensor", "RGB LED", "Xbee"],
       links: [],
-      images: [],
-    },
-    {
-      title: "Workout Tracker",
-      subtitle: "Family gym app with an AI programming agent",
-      role: "Independent Project",
-      dates: "2026 – Present",
-      tags: ["Software"],
-      summary:
-        "Generates and schedules workout programs, then adapts each next week to what was actually logged, including injuries and issues.",
-      bullets: [
-        "Run AI program generation as a Supabase Edge Function calling the Anthropic API, keeping the API key server-side instead of in the client bundle.",
-        "Generate each following week from logged RPE, completion and pain flags, with a ranked exercise-substitution catalog and a review queue for AI-proposed substitutions.",
-        "Design the Postgres schema with Row Level Security on every table, tying app users to Supabase auth identities.",
-        "Build a family leaderboard through a Postgres RPC.",
-      ],
-      stack: ["React", "Tailwind CSS", "Vite", "Supabase", "Vercel"],
-      links: [
-        { label: "Code on GitHub", url: "https://github.com/parker-t-jones/WorkoutTracker" },
-      ],
       images: [],
     },
     {
@@ -177,22 +208,6 @@ const SITE = {
         "Engineered the fixture to catch falling test weights, funnel them into a hydraulic cart, and raise the cart to waist height, improving technician ergonomics and testing throughput.",
       ],
       stack: ["Fixture design", "Hydraulic lift table"],
-      links: [],
-      images: [],
-    },
-    {
-      title: "Autonomous Line-Following Robot",
-      subtitle: "Line tracking, stop detection and heat-signature search",
-      role: "Team Project",
-      dates: "2026",
-      tags: ["Hardware", "Firmware"],
-      summary:
-        "Follows a course, stops at hash marks, and finds a target object by its heat signature.",
-      bullets: [
-        "Built the robot in Arduino C++ to follow a line, detect hash-mark stops, and use an IR thermal sensor to locate a target object's heat signature.",
-        "Programmed it to halt at each hash mark, set an onboard RGB LED to a stop-specific color, and report status over an Xbee wireless link.",
-      ],
-      stack: ["Arduino C++", "IR thermal sensor", "RGB LED", "Xbee"],
       links: [],
       images: [],
     },

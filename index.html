@@ -4,56 +4,105 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Parker Jones</title>
-  <meta name="description" content="Projects and experience of Parker Jones, Electrical & Computer Engineering and Computer Science student at Duke University.">
+  <meta name="description" content="Parker Jones: Electrical & Computer Engineering and Computer Science at Duke. Embedded systems, firmware, hardware and software projects.">
+  <meta name="theme-color" content="#111214">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://parker-t-jones.github.io/">
+  <meta property="og:title" content="Parker Jones">
+  <meta property="og:description" content="ECE + Computer Science at Duke. Embedded systems, firmware, hardware and software projects.">
+  <meta property="og:image" content="https://parker-t-jones.github.io/images/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75..112.5,300..800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <a class="skip" href="#projects">Skip to projects</a>
+  <a class="skip" href="#work">Skip to projects</a>
 
-  <header class="topbar">
-    <a class="topbar-name" href="#top" id="nav-name"></a>
+  <!-- tmux-style status line -->
+  <header class="statusbar">
+    <a class="host" href="#top"><span class="host-user" id="nav-user">parker</span><span class="host-at">@</span><span class="host-box">duke</span></a>
     <nav aria-label="Sections">
-      <a href="#projects">Projects</a>
-      <a href="#experience">Experience</a>
-      <a href="#skills">Skills</a>
-      <a href="#contact">Contact</a>
+      <a href="#work"><span class="win">1</span>projects</a>
+      <a href="#experience"><span class="win">2</span>experience</a>
+      <a href="#skills"><span class="win">3</span>skills</a>
+      <a href="#contact"><span class="win">4</span>contact</a>
     </nav>
   </header>
 
   <main id="top">
-    <section class="hero">
-      <h1 id="name"></h1>
+    <section class="hero" aria-labelledby="name">
+      <div class="hero-text">
+      <div class="hero-id">
+        <figure class="avatar" id="avatar" hidden>
+          <figcaption class="pane-bar" aria-hidden="true"><span id="avatar-name">photo.jpg</span></figcaption>
+          <img id="avatar-img" src="" alt="" width="291" height="382">
+        </figure>
+        <div>
+          <p class="cmd" aria-hidden="true"><span class="ps1">~ $</span> whoami</p>
+          <h1 id="name"><span id="name-text"></span><span class="cursor" aria-hidden="true"></span></h1>
+        </div>
+      </div>
       <p class="headline" id="headline"></p>
       <p class="intro" id="intro"></p>
+      <p class="availability" id="availability"></p>
       <div class="contact-row" id="contact-row"></div>
-    </section>
-
-    <section class="edu" aria-label="Education" id="education"></section>
-
-    <section class="projects" id="projects" aria-labelledby="projects-h">
-      <div class="section-head">
-        <h2 id="projects-h">Projects</h2>
-        <div class="filters" id="filters" role="group" aria-label="Filter projects"></div>
       </div>
-      <ol class="trace" id="project-list"></ol>
-      <p class="empty" id="empty" hidden>No projects match that filter yet.</p>
+
+      <!-- serial console: boot log + a working prompt -->
+      <div class="console" id="console" aria-label="Interactive terminal">
+        <div class="pane-bar"><span>tty.usbserial · 115200 baud</span><span class="pane-hint">type <kbd>help</kbd></span></div>
+        <div class="console-body" id="console-body">
+          <ol class="boot" id="boot" aria-hidden="true"></ol>
+          <div class="console-out" id="console-out" aria-live="polite"></div>
+          <form class="prompt-line" id="prompt-form" autocomplete="off">
+            <label for="prompt" class="ps1">parker@duke:~$</label>
+            <input id="prompt" name="prompt" type="text" spellcheck="false" autocapitalize="off" autocorrect="off" aria-describedby="console-chips">
+          </form>
+        </div>
+        <div class="chips" id="console-chips" aria-label="Quick commands"></div>
+      </div>
     </section>
 
-    <section class="experience" id="experience" aria-labelledby="exp-h">
-      <div class="section-head"><h2 id="exp-h">Work &amp; leadership</h2></div>
-      <div class="exp-grid" id="experience-list"></div>
+    <section class="block" id="education" aria-labelledby="edu-h">
+      <p class="cmd" aria-hidden="true"><span class="ps1">~ $</span> cat education.txt</p>
+      <h2 id="edu-h" class="visually-hidden">Education</h2>
+      <dl class="kv" id="edu-list"></dl>
     </section>
 
-    <section class="skills" id="skills" aria-labelledby="skills-h">
-      <div class="section-head"><h2 id="skills-h">Skills</h2></div>
-      <dl class="skill-grid" id="skill-list"></dl>
+    <section class="block" id="work" aria-labelledby="work-h">
+      <p class="cmd" aria-hidden="true"><span class="ps1">~ $</span> ls ~/projects --featured</p>
+      <h2 id="work-h">Selected work</h2>
+      <div class="panes" id="work-list"></div>
+    </section>
+
+    <section class="block" id="more" aria-labelledby="more-h">
+      <p class="cmd" aria-hidden="true"><span class="ps1">~ $</span> ls -l ~/projects/other</p>
+      <h2 id="more-h">More projects</h2>
+      <div class="listing" id="more-list"></div>
+    </section>
+
+    <section class="block" id="experience" aria-labelledby="exp-h">
+      <p class="cmd" aria-hidden="true"><span class="ps1">~ $</span> tail experience.log</p>
+      <h2 id="exp-h">Work &amp; leadership</h2>
+      <div class="log" id="experience-list"></div>
+    </section>
+
+    <section class="block" id="skills" aria-labelledby="skills-h">
+      <p class="cmd" aria-hidden="true"><span class="ps1">~ $</span> cat skills.yaml</p>
+      <h2 id="skills-h">Skills</h2>
+      <dl class="yaml" id="skill-list"></dl>
     </section>
   </main>
 
   <footer class="footer" id="contact">
+    <p class="cmd" aria-hidden="true"><span class="ps1">~ $</span> ./contact.sh</p>
     <p class="footer-lead">Want to talk about an internship?</p>
     <div class="contact-row" id="contact-row-footer"></div>
     <p class="footer-small" id="footer-small"></p>
