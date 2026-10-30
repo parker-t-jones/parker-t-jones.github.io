@@ -307,45 +307,176 @@
     return all.find((p) => alias(p) === q) || all.find((p) => alias(p).startsWith(q)) || all.find((p) => slug(p.title).includes(q));
   }
   const c = S.contact || {};
+  const featuredP = all.filter((p) => p.featured);
+  const otherP = all.filter((p) => !p.featured);
+
+  /* --- a tiny read-only file system for the commands shown on the page --- */
+  const pad = (t, n) => (t + ":").padEnd(n, " ");
+  function jumpLink(id, label) {
+    const a = el("a", { href: "#" + id, class: "ls-link", text: label || "↳ jump to section" });
+    a.addEventListener("click", (ev) => { ev.preventDefault(); go(id); });
+    return a;
+  }
+  function runLink(cmd, label, cls) {
+    const a = el("a", { href: "#", class: cls || "ls-link", text: label });
+    a.addEventListener("click", (ev) => { ev.preventDefault(); run(cmd); input.focus({ preventScroll: true }); });
+    return a;
+  }
+  function catEducation() {
+    const e = S.education || {};
+    print(
+      el("span", {}, el("span", { class: "dim", text: pad("school", 12) }), e.school || ""),
+      el("span", {}, el("span", { class: "dim", text: pad("degree", 12) }), e.degree || ""),
+      el("span", {}, el("span", { class: "dim", text: pad("gpa", 12) }), el("b", { class: "ok", text: e.gpa || "" })),
+      el("span", {}, el("span", { class: "dim", text: pad("graduating", 12) }), (e.graduation || "").replace(/^Expected\s*/i, "")),
+      el("span", {}, el("span", { class: "dim", text: pad("coursework", 12) }), (e.coursework || []).join(", ")),
+      jumpLink("education"));
+  }
+  function catSkills() {
+    print(...(S.skills || []).map((g) =>
+      el("span", {}, el("b", { class: "cmd-name", text: slug(g.group).replace(/-/g, "_") + ": " }),
+        el("span", { class: "dim", text: "[" }), g.items.join(", "), el("span", { class: "dim", text: "]" }))),
+      jumpLink("skills"));
+  }
+  function tailExperience() {
+    (S.experience || []).forEach((x) => print(
+      el("span", {}, el("span", { class: "dim", text: "[" + x.dates + "] " }), el("span", { class: "ok", text: "INFO " }),
+        el("b", { class: "cmd-name", text: x.title }), el("span", { class: "dim", text: " · " + x.role })),
+      ...(x.bullets || []).map((b) => "  › " + b)));
+    print(jumpLink("experience"));
+  }
+  function contactSh() {
+    print(...[["email", c.email && "mailto:" + c.email, c.email], ["linkedin", c.linkedin, c.linkedin && host(c.linkedin)],
+        ["github", c.github, c.github && host(c.github)], ["resume", c.resume, c.resume && "resume.pdf"]]
+      .filter((r) => r[1])
+      .map(([k, href, label]) => el("span", {}, el("span", { class: "dim", text: pad(k, 10) }),
+        el("a", { href, target: href.startsWith("mailto") ? null : "_blank", rel: "noopener", text: label }))));
+  }
+  function catProject(p) {
+    const b = (p.bullets || []).slice(0, 3);
+    print(
+      el("b", { class: "cmd-name", text: "# " + p.title }),
+      el("span", { class: "dim", text: p.role + "  ·  " + p.dates }),
+      p.summary || "",
+      ...b.map((x) => "  › " + x),
+      ...((p.links || []).filter((l) => l.url).map((l) => el("span", {}, "  ↗ ",
+        el("a", { href: l.url, target: "_blank", rel: "noopener", text: l.label || host(l.url) })))),
+      jumpLink(slug(p.title), "↳ open " + alias(p) + " on the page"));
+  }
+
+  const FILES = {
+    "education.txt": { mode: "-rw-r--r--", desc: "school, gpa, coursework", cat: catEducation },
+    "experience.log": { mode: "-rw-r--r--", desc: "work & leadership", cat: tailExperience },
+    "skills.yaml": { mode: "-rw-r--r--", desc: "languages, hardware, tools", cat: catSkills },
+    "contact.sh": { mode: "-rwxr-xr-x", desc: "email, linkedin, github", cat: contactSh, exec: contactSh },
+  };
+  if (c.resume) FILES["resume.pdf"] = { mode: "-rw-r--r--", desc: "one page", cat: () => commands.resume(), exec: () => commands.resume() };
+
+  // turn "~/projects/other/safelifts-simulator/" etc. into a node
+  function resolve(path) {
+    let q = (path || "").trim().replace(/^\/home\/parker\/?/, "~/").replace(/^~\/?/, "").replace(/^\.\/?/, "").replace(/\/+$/, "");
+    if (q === "" || q === "~") return { type: "home" };
+    if (q === "projects") return { type: "projects" };
+    if (q === "projects/other" || q === "other") return { type: "other" };
+    if (FILES[q]) return { type: "file", name: q };
+    const name = q.replace(/^projects\/(other\/)?/, "");
+    if (name.includes("/")) return null;
+    const p = findProject(name);
+    return p ? { type: "project", project: p } : null;
+  }
+  function entry(name, long, mode, desc, onClick) {
+    const link = typeof onClick === "string" ? runLink(onClick, name) : (() => {
+      const a = el("a", { href: "#", class: "ls-link", text: name });
+      a.addEventListener("click", (ev) => { ev.preventDefault(); onClick(); });
+      return a;
+    })();
+    return long
+      ? el("span", {}, el("span", { class: "dim", text: mode + "  " }), link, el("span", { class: "dim", text: "  " + desc }))
+      : link;
+  }
+  function printEntries(items, long) {
+    if (long) print(...items);
+    else print(el("span", {}, ...items.flatMap((x, i) => (i ? ["   ", x] : [x]))));
+  }
+  function listProjects(list, long, prefix) {
+    return list.map((p) => entry(alias(p) + "/", long, "drwxr-xr-x", p.dates + "  " + p.title,
+      "cat " + prefix + alias(p)));
+  }
+
   const commands = {
     help: () => print(
       "commands:",
       ...[
         ["whoami", "who I am"],
-        ["ls", "list projects"],
-        ["open <name>", "jump to a project, e.g. open pivot"],
-        ["education", "school, gpa, coursework"],
-        ["experience", "work & leadership"],
-        ["skills", "languages, hardware, tools"],
-        ["contact", "email, linkedin, github"],
+        ["ls [path] [-l]", "list files, e.g. ls ~/projects"],
+        ["cat <file>", "print a file, e.g. cat education.txt"],
+        ["tail experience.log", "work & leadership"],
+        ["open <project>", "jump to a project, e.g. open pivot"],
+        ["./contact.sh", "email, linkedin, github"],
         ["clear", "clear the screen"],
         ["sudo hire parker", "you know you want to"],
-      ].map(([a, b]) => el("span", {}, "  ", el("b", { class: "cmd-name", text: a.padEnd(18, " ") }), el("span", { class: "dim", text: b })))),
+      ].map(([a, b]) => el("span", {}, "  ", el("b", { class: "cmd-name", text: a.padEnd(21, " ") }), el("span", { class: "dim", text: b }))),
+      el("span", { class: "dim", text: "files: " + Object.keys(FILES).join("  ") + "  projects/" })),
     whoami: () => print(el("b", { text: S.name }), S.headline, el("span", { class: "dim", text: S.availability || "" })),
-    ls: () => print(...all.map((p) => {
-      const a = el("a", { href: "#" + slug(p.title), class: "ls-link", text: alias(p) + "/" });
-      a.addEventListener("click", (ev) => { ev.preventDefault(); go(slug(p.title)); });
-      return el("span", {}, a, "  ", el("span", { class: "dim", text: p.title + (p.featured ? "  ★" : "") }));
-    })),
+    pwd: () => print("/home/" + first),
+    echo: (arg) => print(arg || ""),
+    ls: (arg) => {
+      const toks = (arg || "").split(/\s+/).filter(Boolean);
+      const flags = toks.filter((t) => t.startsWith("-"));
+      const long = flags.some((f) => /^-[a-z]*l/.test(f));
+      const featuredOnly = flags.includes("--featured");
+      const paths = toks.filter((t) => !t.startsWith("-"));
+      const node = resolve(paths[0] || "");
+      if (!node) return print("ls: cannot access '" + paths[0] + "': No such file or directory");
+      if (node.type === "home") {
+        const rows = Object.entries(FILES).map(([n, f]) => [n, entry(n, long, f.mode, f.desc, f.exec ? "./" + n : "cat " + n)]);
+        rows.push(["projects/", entry("projects/", long, "drwxr-xr-x", all.length + " projects", "ls ~/projects")]);
+        rows.sort((a, b) => a[0].localeCompare(b[0]));
+        return printEntries(rows.map((r) => r[1]), long);
+      }
+      if (node.type === "projects") {
+        const items = listProjects(featuredP, long, "~/projects/");
+        if (!featuredOnly && otherP.length) items.push(entry("other/", long, "drwxr-xr-x", otherP.length + " more projects", "ls -l ~/projects/other"));
+        return printEntries(items, long);
+      }
+      if (node.type === "other") return printEntries(listProjects(otherP, long, "~/projects/other/"), long);
+      if (node.type === "file") return printEntries([entry(node.name, long, FILES[node.name].mode, FILES[node.name].desc, "cat " + node.name)], long);
+      if (node.type === "project") return catProject(node.project);
+    },
+    cat: (arg) => {
+      const target = (arg || "").split(/\s+/).filter((t) => !t.startsWith("-"))[0];
+      if (!target) return print("usage: cat <file>   (try: cat education.txt)");
+      const node = resolve(target);
+      if (!node) return print("cat: " + target + ": No such file or directory");
+      if (node.type === "file") return FILES[node.name].cat();
+      if (node.type === "project") return catProject(node.project);
+      return print("cat: " + target + ": Is a directory. try ls " + target);
+    },
+    tail: (arg) => commands.cat(arg),
     open: (arg) => {
       if (!arg) return print("usage: open <name>   (try: open pivot)");
-      const p = findProject(arg);
-      if (!p) return print("open: no such project: " + arg + ". try ls");
+      const node = resolve(arg);
+      if (node && node.type === "file") return FILES[node.name].cat();
+      const p = node && node.type === "project" ? node.project : null;
+      if (!p) return print("open: no such project: " + arg + ". try ls ~/projects");
       print("opening ~/projects/" + alias(p) + " …");
       go(slug(p.title));
     },
-    education: () => { print("cat education.txt"); go("education"); },
-    experience: () => { print("tail experience.log"); go("experience"); },
-    skills: () => { print("cat skills.yaml"); go("skills"); },
-    contact: () => print(
-      ...[["email", c.email && "mailto:" + c.email, c.email], ["linkedin", c.linkedin, c.linkedin && host(c.linkedin)],
-          ["github", c.github, c.github && host(c.github)]]
-        .filter((r) => r[1])
-        .map(([k, href, label]) => el("span", {}, el("span", { class: "dim", text: (k + ":").padEnd(10, " ") }),
-          el("a", { href, target: href.startsWith("mailto") ? null : "_blank", rel: "noopener", text: label })))),
+    cd: (arg) => {
+      const node = resolve(arg || "");
+      if (!node) return print("cd: " + arg + ": No such file or directory");
+      if (node.type === "project") return commands.open(arg);
+      if (node.type === "file") return print("cd: " + arg + ": Not a directory");
+      if (node.type === "home") return;
+      commands.ls(arg);
+    },
+    education: () => catEducation(),
+    experience: () => tailExperience(),
+    skills: () => catSkills(),
+    contact: () => contactSh(),
     resume: () => c.resume
       ? (print("opening resume.pdf …"), window.open(c.resume, "_blank", "noopener"))
-      : print("resume.pdf: available on request. run contact"),
+      : print("resume.pdf: available on request. run ./contact.sh"),
     clear: () => { out.textContent = ""; $("boot").hidden = true; },
     sudo: (arg) => {
       if (/^hire\b/.test(arg || "")) {
@@ -353,11 +484,17 @@
         if (c.email) setTimeout(() => { location.href = "mailto:" + c.email + "?subject=" + encodeURIComponent("Internship opportunity"); }, 700);
       } else print("sudo: nice try. (hint: sudo hire parker)");
     },
-    exit: () => print("logout? the connection stays open. run contact instead."),
+    exit: () => print("logout? the connection stays open. run ./contact.sh instead."),
   };
-  commands.cd = commands.open; commands.cat = commands.open;
-  commands.projects = commands.ls; commands.email = commands.contact;
+  commands.head = commands.tail; commands.less = commands.cat; commands.more = commands.cat;
+  commands.dir = commands.ls; commands.ll = (arg) => commands.ls("-l " + (arg || ""));
+  commands.projects = () => commands.ls("~/projects"); commands.email = commands.contact;
   commands["?"] = commands.help; commands.man = commands.help;
+  commands.sh = commands.bash = (arg) => {
+    const f = resolve(arg || "");
+    if (f && f.type === "file" && FILES[f.name].exec) return FILES[f.name].exec();
+    print((arg || "sh") + ": cannot run that. try ./contact.sh");
+  };
 
   function run(raw) {
     const line = raw.trim();
@@ -365,6 +502,12 @@
     if (!line) return;
     history.push(line); hpos = history.length;
     const [name, ...rest] = line.split(/\s+/);
+    if (/^(\.\/|~\/)/.test(name)) {               // ./contact.sh
+      const f = resolve(name);
+      if (f && f.type === "file" && FILES[f.name].exec) return FILES[f.name].exec();
+      if (f && f.type === "file") return print(name + ": Permission denied");
+      return print(name + ": No such file or directory");
+    }
     const fn = commands[name.toLowerCase()];
     if (fn) fn(rest.join(" "));
     else print(name + ": command not found. try help");
@@ -375,16 +518,22 @@
     if (ev.key === "ArrowDown" && history.length) { ev.preventDefault(); hpos = Math.min(history.length, hpos + 1); input.value = history[hpos] || ""; }
     if (ev.key === "Tab") {
       const v = input.value;
+      if (!v) return;
       const parts = v.split(/\s+/);
-      let pool, prefix;
-      if (parts.length <= 1) { pool = Object.keys(commands); prefix = parts[0] || ""; }
-      else if (["open", "cd", "cat"].includes(parts[0])) { pool = all.map(alias); prefix = parts[1] || ""; }
-      if (!pool || !v) return;
-      const hits = pool.filter((x) => x.startsWith(prefix.toLowerCase()));
+      const last = parts[parts.length - 1];
+      let pool;
+      if (parts.length <= 1) pool = Object.keys(commands).concat(Object.keys(FILES).filter((f) => FILES[f].exec).map((f) => "./" + f));
+      else if (["cat", "tail", "head", "less", "more"].includes(parts[0])) pool = Object.keys(FILES).concat(["projects/", "projects/other/"], all.map(alias));
+      else if (["ls", "ll", "dir", "cd"].includes(parts[0])) pool = ["~/projects", "~/projects/other", "projects", "projects/other"].concat(all.map(alias));
+      else if (["open", "sh", "bash"].includes(parts[0])) pool = parts[0] === "open" ? all.map(alias) : Object.keys(FILES).filter((f) => FILES[f].exec);
+      if (!pool) return;
+      const hits = [...new Set(pool)].filter((x) => x.startsWith(last.toLowerCase()));
       if (!hits.length) return;
       ev.preventDefault();
-      if (hits.length === 1) input.value = (parts.length <= 1 ? "" : parts[0] + " ") + hits[0] + (parts.length <= 1 ? " " : "");
-      else print(hits.join("   "));
+      if (hits.length === 1) {
+        parts[parts.length - 1] = hits[0];
+        input.value = parts.join(" ") + (hits[0].endsWith("/") ? "" : " ");
+      } else print(hits.join("   "));
     }
   });
   // clicking anywhere in the console focuses the prompt (but not when selecting text or clicking a link)
@@ -392,7 +541,7 @@
     if (ev.target.closest("a") || String(window.getSelection())) return;
     input.focus({ preventScroll: true });
   });
-  ["help", "ls", "open pivot", "contact"].forEach((cmd) => {
+  ["help", "ls", "open pivot", "./contact.sh"].forEach((cmd) => {
     const b = el("button", { type: "button", class: "chip" }, el("span", { class: "dim", text: "$ " }), cmd);
     b.addEventListener("click", () => run(cmd));
     $("console-chips").append(b);
