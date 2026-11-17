@@ -327,6 +327,7 @@
     if (node.closest("[data-filtered-out]") || node.hasAttribute("data-filtered-out")) setFilter("All");
     if (node.tagName === "DETAILS") node.open = true;
     node.classList.add("is-visible");
+    if (window.matchMedia("(max-width: 760px)").matches) closeTerm();
     node.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
     node.classList.remove("flash"); void node.offsetWidth; node.classList.add("flash");
     if (after) after();
@@ -444,6 +445,7 @@
         ["open <project>", "jump to a project, e.g. open pivot"],
         ["./contact.sh", "email, linkedin, github"],
         ["clear", "clear the screen"],
+        ["exit", "close the terminal (or press Esc)"],
         ["theme [dark|light]", "switch the site's colors"],
         ["sudo hire parker", "you know you want to"],
       ].map(([a, b]) => el("span", {}, "  ", el("b", { class: "cmd-name", text: a.padEnd(21, " ") }), el("span", { class: "dim", text: b }))),
@@ -659,4 +661,79 @@
     applyTheme(t); try { localStorage.setItem("theme", t); } catch (err) {}
     print("theme set to " + t);
   };
+
+  /* ---------- Terminal pop-out ---------- */
+  const term = $("console"), termBtn = $("term-toggle");
+  function openTerm() {
+    if (!term.hidden) return input.focus({ preventScroll: true });
+    term.hidden = false;
+    requestAnimationFrame(() => term.classList.add("open"));
+    termBtn.setAttribute("aria-expanded", "true");
+    body.scrollTop = body.scrollHeight;
+    setTimeout(() => input.focus({ preventScroll: true }), 60);
+  }
+  function closeTerm() {
+    if (term.hidden) return;
+    term.classList.remove("open");
+    termBtn.setAttribute("aria-expanded", "false");
+    setTimeout(() => { if (!term.classList.contains("open")) term.hidden = true; }, reduceMotion ? 0 : 220);
+    if (term.contains(document.activeElement)) termBtn.focus({ preventScroll: true });
+  }
+  termBtn.addEventListener("click", () => (term.hidden ? openTerm() : closeTerm()));
+  $("term-hint").addEventListener("click", openTerm);
+  $("term-close").addEventListener("click", closeTerm);
+  commands.exit = commands.logout = () => { print("logout"); setTimeout(closeTerm, 300); };
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape" && !term.hidden && !document.querySelector("dialog[open]")) return closeTerm();
+    if (ev.key !== "`" || ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    const t = ev.target;
+    const typing = t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+    if (typing && t !== input) return;
+    ev.preventDefault();
+    term.hidden ? openTerm() : closeTerm();
+  });
+
+  /* ---------- Hero showcase ---------- */
+  const shots = (S.showcase || []).filter((x) => x && x.src);
+  if (shots.length) {
+    const frame = $("showcase-frame"), cap = $("showcase-text"), dots = $("showcase-dots");
+    $("showcase").hidden = false;
+    let cur = 0, timer = null;
+    const slides = shots.map((x, i) => {
+      const proj = x.project && S.projects.find((p) => p.title === x.project);
+      const b = el("button", { type: "button", class: "slide" + (x.kind === "phone" ? " is-phone" : "") + (i === 0 ? " on" : ""),
+          "aria-label": (x.alt || "Project image") + (proj ? ", open " + proj.title : ""), tabindex: i === 0 ? "0" : "-1" },
+        el("img", { src: x.src, alt: "", loading: i === 0 ? "eager" : "lazy", decoding: "async" }));
+      b.addEventListener("click", () => { if (proj) go(slug(proj.title)); });
+      frame.append(b);
+      return { el: b, data: x, proj };
+    });
+    const dotEls = shots.length > 1 ? shots.map((x, i) => {
+      const d = el("button", { type: "button", class: "dot", "aria-label": "Show image " + (i + 1) + " of " + shots.length });
+      d.addEventListener("click", () => { show(i); restart(); });
+      dots.append(d);
+      return d;
+    }) : [];
+    function show(i) {
+      cur = (i + slides.length) % slides.length;
+      slides.forEach((s2, n) => { s2.el.classList.toggle("on", n === cur); s2.el.tabIndex = n === cur ? 0 : -1; });
+      dotEls.forEach((d, n) => d.setAttribute("aria-current", String(n === cur)));
+      const sl = slides[cur];
+      cap.textContent = "";
+      cap.append(el("span", { text: sl.data.caption || sl.data.alt || "" }));
+      if (sl.proj) {
+        const a = el("a", { href: "#" + slug(sl.proj.title), class: "showcase-link", text: "See project →" });
+        a.addEventListener("click", (ev) => { ev.preventDefault(); go(slug(sl.proj.title)); });
+        cap.append(" ", a);
+      }
+    }
+    function restart() {
+      clearInterval(timer);
+      if (!reduceMotion && slides.length > 1) timer = setInterval(() => show(cur + 1), 5000);
+    }
+    $("showcase").addEventListener("mouseenter", () => clearInterval(timer));
+    $("showcase").addEventListener("mouseleave", restart);
+    $("showcase").addEventListener("focusin", () => clearInterval(timer));
+    show(0); restart();
+  }
 })();

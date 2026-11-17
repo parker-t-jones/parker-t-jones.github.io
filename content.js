@@ -41,6 +41,17 @@ const SITE = {
   // Short tags under the intro for the kinds of work you want to do.
   focus: ["Embedded systems", "Firmware", "Hardware bring-up", "Full-stack apps"],
 
+  // The rotating images beside your intro at the top of the page. Each one links
+  // to its project (project: the project's title). Put your best visuals here,
+  // e.g. a photo of the wristband prototype once you have one:
+  //   { src: "images/wristband.jpg", alt: "...", caption: "...", project: "Scissor-Lift Object Detection System" },
+  // Mark tall phone screenshots with kind: "phone". Use [] to hide the showcase.
+  showcase: [
+    { src: "images/pivot-web-home.webp", alt: "Pivot web app home screen", caption: "Pivot: the week's games and the one that matters most", project: "Pivot" },
+    { src: "images/pivot-ios-board.webp", kind: "phone", alt: "Pivot iOS board screen", caption: "Pivot on iOS, built with React Native (Expo)", project: "Pivot" },
+    { src: "images/pivot-web-watchlist.webp", alt: "Pivot watchlist table", caption: "Pivot: every player, bet and pool, with where to watch", project: "Pivot" },
+  ],
+
   // The "at a glance" boxes under the intro, so a recruiter gets the key facts in
   // five seconds. Edit, reorder or delete any of them. {projects} is replaced
   // with how many projects are listed below.

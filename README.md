@@ -1,6 +1,6 @@
 # Parker Jones · Portfolio
 
-A plain HTML/CSS/JS site: a clean light layout by default, a dark terminal theme behind the moon/sun toggle, and a working terminal in the hero. No build step, no frameworks. GitHub Pages serves it as-is.
+A plain HTML/CSS/JS site: a clean light layout by default, a dark terminal theme behind the moon/sun toggle, a rotating project showcase up top, and a pop-out terminal. No build step, no frameworks. GitHub Pages serves it as-is.
 
 ## Files
 
@@ -18,6 +18,7 @@ New fields in `content.js`:
 
 - **`eyebrow`**: the small label above your name.
 - **`focus`**: the short tags under the intro (what kind of work you want).
+- **`showcase`**: the rotating images beside your intro. Each links to its project. Put your best visuals here (a photo of the wristband prototype would be great).
 - **`facts`**: the "at a glance" strip (degree, GPA, graduation, internship term). Keep it to about four.
 - Project **status** ("Ongoing" / "Completed") is automatic: any project whose `dates` include "Present" is Ongoing.
 - The **filter buttons** above the projects come from `filters` and each project's `tags`.
@@ -42,7 +43,7 @@ If the page goes blank after an edit, it's almost always a missing comma or quot
 
 ## The terminal
 
-The console at the top is optional for visitors; everything on the page reads without it. Commands: `help`, `theme dark|light`, `whoami`, `ls`, `open <name>`, `education`, `experience`, `skills`, `contact`, `resume`, `clear`, and `sudo hire parker`. Tab completes, and the up arrow recalls earlier commands.
+The terminal opens from the **>_ Terminal** button in the top bar, the link under the intro, or the backtick key (`` ` ``); Esc or `exit` closes it. It's optional for visitors; everything on the page reads without it. Commands: `help`, `theme dark|light`, `whoami`, `ls`, `open <name>`, `education`, `experience`, `skills`, `contact`, `resume`, `clear`, and `sudo hire parker`. Tab completes, and the up arrow recalls earlier commands.
 
 ## Previewing locally (optional)
 

@@ -41,6 +41,7 @@
         <a href="#contact">Contact</a>
       </nav>
       <div class="topbar-actions">
+        <button type="button" class="term-toggle" id="term-toggle" aria-controls="console" aria-expanded="false" title="Open terminal (press ` )"><span aria-hidden="true">&gt;_</span><span class="term-toggle-label">Terminal</span></button>
         <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to dark theme" title="Toggle light/dark">
           <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.7 14.6A8.5 8.5 0 0 1 9.4 3.3a8.5 8.5 0 1 0 11.3 11.3z"/></svg>
           <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></g></svg>
@@ -69,25 +70,17 @@
         <ul class="focus" id="focus" aria-label="Focus areas"></ul>
         <div class="contact-row" id="contact-row"></div>
         <ul class="facts" id="facts" aria-label="At a glance"></ul>
+        <button type="button" class="term-hint" id="term-hint"><span class="term-hint-prompt" aria-hidden="true">&gt;_</span> Prefer the command line? Open the terminal <kbd>`</kbd></button>
       </div>
 
-      <!-- serial console: boot log + a working prompt -->
-      <div class="console" id="console" aria-label="Interactive terminal">
-        <div class="pane-bar">
-          <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
-          <span>parker@duke: ~</span>
-          <span class="pane-hint">try <kbd>help</kbd></span>
-        </div>
-        <div class="console-body" id="console-body">
-          <ol class="boot" id="boot" aria-hidden="true"></ol>
-          <div class="console-out" id="console-out" aria-live="polite"></div>
-          <form class="prompt-line" id="prompt-form" autocomplete="off">
-            <label for="prompt" class="ps1">parker@duke:~$</label>
-            <input id="prompt" name="prompt" type="text" spellcheck="false" autocapitalize="off" autocorrect="off" aria-describedby="console-chips">
-          </form>
-        </div>
-        <div class="chips" id="console-chips" aria-label="Quick commands"></div>
-      </div>
+      <!-- rotating showcase of project images (set in content.js -> showcase) -->
+      <figure class="showcase" id="showcase" hidden>
+        <div class="showcase-frame" id="showcase-frame"></div>
+        <figcaption class="showcase-cap">
+          <span class="showcase-text" id="showcase-text"></span>
+          <span class="showcase-dots" id="showcase-dots" role="group" aria-label="Choose image"></span>
+        </figcaption>
+      </figure>
     </section>
 
     <section class="block" id="work" aria-labelledby="work-h">
@@ -144,6 +137,25 @@
       <p class="footer-small" id="footer-small"></p>
     </div>
   </footer>
+
+<!-- serial console: boot log + a working prompt -->
+  <aside class="console" id="console" aria-label="Interactive terminal" hidden>
+    <div class="pane-bar">
+      <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span>parker@duke: ~</span>
+      <span class="pane-hint">try <kbd>help</kbd></span>
+      <button type="button" class="term-close" id="term-close" aria-label="Close terminal">✕</button>
+    </div>
+    <div class="console-body" id="console-body">
+      <ol class="boot" id="boot" aria-hidden="true"></ol>
+      <div class="console-out" id="console-out" aria-live="polite"></div>
+      <form class="prompt-line" id="prompt-form" autocomplete="off">
+        <label for="prompt" class="ps1">parker@duke:~$</label>
+        <input id="prompt" name="prompt" type="text" spellcheck="false" autocapitalize="off" autocorrect="off" aria-describedby="console-chips">
+      </form>
+    </div>
+    <div class="chips" id="console-chips" aria-label="Quick commands"></div>
+  </aside>
 
   <a class="to-top" id="to-top" href="#top" aria-label="Back to top">↑ Top</a>
 
