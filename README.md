@@ -1,6 +1,6 @@
 # Parker Jones · Portfolio
 
-A plain HTML/CSS/JS site with a terminal theme. No build step, no frameworks. GitHub Pages serves it as-is.
+A plain HTML/CSS/JS site: a clean light layout by default, a dark terminal theme behind the moon/sun toggle, and a working terminal in the hero. No build step, no frameworks. GitHub Pages serves it as-is.
 
 ## Files
 
@@ -9,10 +9,19 @@ A plain HTML/CSS/JS site with a terminal theme. No build step, no frameworks. Gi
 | `content.js` | Every word on the site: intro, photo, education, projects, work, skills, links | **Yes, this is the one** |
 | `images/` | Your photo, project photos and screenshots, and `og-card.png` (the link-preview image) | Add files here |
 | `index.html` | Page skeleton | Rarely |
-| `styles.css` | Colors, fonts, layout (colors are the `--` variables at the top) | Only to change the look |
+| `styles.css` | Colors, fonts, layout (light colors are the `--` variables at the top, dark ones right below) | Only to change the look |
 | `main.js` | Turns `content.js` into the page and runs the terminal | No |
 
 ## Editing content
+
+New fields in `content.js`:
+
+- **`eyebrow`**: the small label above your name.
+- **`focus`**: the short tags under the intro (what kind of work you want).
+- **`facts`**: the "at a glance" strip (degree, GPA, graduation, internship term). Keep it to about four.
+- Project **status** ("Ongoing" / "Completed") is automatic: any project whose `dates` include "Present" is Ongoing.
+- The **filter buttons** above the projects come from `filters` and each project's `tags`.
+
 
 Open `content.js` on GitHub (click the file, then the pencil icon), change text, and click **Commit changes**. The live site updates in about a minute.
 
@@ -33,7 +42,7 @@ If the page goes blank after an edit, it's almost always a missing comma or quot
 
 ## The terminal
 
-The console at the top is optional for visitors; everything on the page reads without it. Commands: `help`, `whoami`, `ls`, `open <name>`, `education`, `experience`, `skills`, `contact`, `resume`, `clear`, and `sudo hire parker`. Tab completes, and the up arrow recalls earlier commands.
+The console at the top is optional for visitors; everything on the page reads without it. Commands: `help`, `theme dark|light`, `whoami`, `ls`, `open <name>`, `education`, `experience`, `skills`, `contact`, `resume`, `clear`, and `sudo hire parker`. Tab completes, and the up arrow recalls earlier commands.
 
 ## Previewing locally (optional)
 

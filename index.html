@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Parker Jones</title>
   <meta name="description" content="Parker Jones: Electrical & Computer Engineering and Computer Science at Duke. Embedded systems, firmware, hardware and software projects.">
-  <meta name="theme-color" content="#111214">
+  <meta name="theme-color" content="#fafaf8">
 
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://parker-t-jones.github.io/">
@@ -16,48 +16,68 @@
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
 
+  <!-- apply the saved light/dark choice before anything paints -->
+  <script>
+    try { var t = localStorage.getItem("theme"); if (t === "dark" || t === "light") document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75..112.5,300..800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Martian+Mono:wdth,wght@75..112.5,300..800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <a class="skip" href="#work">Skip to projects</a>
 
-  <!-- tmux-style status line -->
-  <header class="statusbar">
-    <a class="host" href="#top"><span class="host-user" id="nav-user">parker</span><span class="host-at">@</span><span class="host-box">duke</span></a>
-    <nav aria-label="Sections">
-      <a href="#work"><span class="win">1</span>projects</a>
-      <a href="#experience"><span class="win">2</span>experience</a>
-      <a href="#skills"><span class="win">3</span>skills</a>
-      <a href="#contact"><span class="win">4</span>contact</a>
-    </nav>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true">PJ</span><span class="brand-name" id="brand-name">Parker Jones</span></a>
+      <nav aria-label="Sections" id="nav">
+        <a href="#work">Projects</a>
+        <a href="#experience">Experience</a>
+        <a href="#education">Education</a>
+        <a href="#skills">Skills</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <div class="topbar-actions">
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to dark theme" title="Toggle light/dark">
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.7 14.6A8.5 8.5 0 0 1 9.4 3.3a8.5 8.5 0 1 0 11.3 11.3z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></g></svg>
+        </button>
+        <span id="topbar-cta"></span>
+      </div>
+    </div>
+    <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
   </header>
 
   <main id="top">
     <section class="hero" aria-labelledby="name">
       <div class="hero-text">
-      <div class="hero-id">
-        <figure class="avatar" id="avatar" hidden>
-          <figcaption class="pane-bar" aria-hidden="true"><span id="avatar-name">photo.jpg</span></figcaption>
-          <img id="avatar-img" src="" alt="" width="291" height="382">
-        </figure>
-        <div>
-          <p class="cmd" aria-hidden="true"><span class="ps1">~ $</span> whoami</p>
-          <h1 id="name"><span id="name-text"></span><span class="cursor" aria-hidden="true"></span></h1>
+        <div class="hero-id">
+          <figure class="avatar" id="avatar" hidden>
+            <img id="avatar-img" src="" alt="" width="291" height="382">
+          </figure>
+          <div>
+            <p class="eyebrow" id="hero-eyebrow"></p>
+            <h1 id="name"><span id="name-text"></span></h1>
+            <p class="headline" id="headline"></p>
+          </div>
         </div>
-      </div>
-      <p class="headline" id="headline"></p>
-      <p class="intro" id="intro"></p>
-      <p class="availability" id="availability"></p>
-      <div class="contact-row" id="contact-row"></div>
+        <p class="intro" id="intro"></p>
+        <p class="availability" id="availability"></p>
+        <ul class="focus" id="focus" aria-label="Focus areas"></ul>
+        <div class="contact-row" id="contact-row"></div>
+        <ul class="facts" id="facts" aria-label="At a glance"></ul>
       </div>
 
       <!-- serial console: boot log + a working prompt -->
       <div class="console" id="console" aria-label="Interactive terminal">
-        <div class="pane-bar"><span>tty.usbserial · 115200 baud</span><span class="pane-hint">type <kbd>help</kbd></span></div>
+        <div class="pane-bar">
+          <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>parker@duke: ~</span>
+          <span class="pane-hint">try <kbd>help</kbd></span>
+        </div>
         <div class="console-body" id="console-body">
           <ol class="boot" id="boot" aria-hidden="true"></ol>
           <div class="console-out" id="console-out" aria-live="polite"></div>
@@ -70,43 +90,62 @@
       </div>
     </section>
 
-    <section class="block" id="education" aria-labelledby="edu-h">
-      <p class="cmd" aria-hidden="true"><span class="ps1">~ $</span> cat education.txt</p>
-      <h2 id="edu-h" class="visually-hidden">Education</h2>
-      <dl class="kv" id="edu-list"></dl>
-    </section>
-
     <section class="block" id="work" aria-labelledby="work-h">
-      <p class="cmd" aria-hidden="true"><span class="ps1">~ $</span> ls ~/projects --featured</p>
-      <h2 id="work-h">Selected work</h2>
+      <div class="section-head">
+        <p class="eyebrow">01 · Projects</p>
+        <h2 id="work-h">Selected work</h2>
+      </div>
+      <div class="filters" id="filters" role="group" aria-label="Filter projects by type"></div>
+      <p class="filter-status" id="filter-status" aria-live="polite"></p>
       <div class="panes" id="work-list"></div>
     </section>
 
-    <section class="block" id="more" aria-labelledby="more-h">
-      <p class="cmd" aria-hidden="true"><span class="ps1">~ $</span> ls -l ~/projects/other</p>
-      <h2 id="more-h">More projects</h2>
+    <section class="block block-tight" id="more" aria-labelledby="more-h">
+      <div class="section-head">
+        <h2 id="more-h" class="h-sub">More projects</h2>
+        <p class="section-note">Click any row for details.</p>
+      </div>
       <div class="listing" id="more-list"></div>
     </section>
 
     <section class="block" id="experience" aria-labelledby="exp-h">
-      <p class="cmd" aria-hidden="true"><span class="ps1">~ $</span> tail experience.log</p>
-      <h2 id="exp-h">Work &amp; leadership</h2>
+      <div class="section-head">
+        <p class="eyebrow">02 · Experience</p>
+        <h2 id="exp-h">Work &amp; leadership</h2>
+      </div>
       <div class="log" id="experience-list"></div>
     </section>
 
+    <section class="block" id="education" aria-labelledby="edu-h">
+      <div class="section-head">
+        <p class="eyebrow">03 · Education</p>
+        <h2 id="edu-h">Education</h2>
+      </div>
+      <div class="edu-card">
+        <dl class="kv" id="edu-list"></dl>
+      </div>
+    </section>
+
     <section class="block" id="skills" aria-labelledby="skills-h">
-      <p class="cmd" aria-hidden="true"><span class="ps1">~ $</span> cat skills.yaml</p>
-      <h2 id="skills-h">Skills</h2>
+      <div class="section-head">
+        <p class="eyebrow">04 · Skills</p>
+        <h2 id="skills-h">Skills &amp; tools</h2>
+      </div>
       <dl class="yaml" id="skill-list"></dl>
     </section>
   </main>
 
   <footer class="footer" id="contact">
-    <p class="cmd" aria-hidden="true"><span class="ps1">~ $</span> ./contact.sh</p>
-    <p class="footer-lead">Want to talk about an internship?</p>
-    <div class="contact-row" id="contact-row-footer"></div>
-    <p class="footer-small" id="footer-small"></p>
+    <div class="footer-inner">
+      <p class="eyebrow">05 · Contact</p>
+      <p class="footer-lead">Want to talk about an internship?</p>
+      <p class="footer-sub" id="footer-sub"></p>
+      <div class="contact-row" id="contact-row-footer"></div>
+      <p class="footer-small" id="footer-small"></p>
+    </div>
   </footer>
+
+  <a class="to-top" id="to-top" href="#top" aria-label="Back to top">↑ Top</a>
 
   <script src="content.js"></script>
   <script src="main.js"></script>

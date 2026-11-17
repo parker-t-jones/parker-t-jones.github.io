@@ -26,7 +26,9 @@
 
 const SITE = {
   name: "Parker Jones",
-  headline: "ECE + Computer Science at Duke.",
+  // Small label above your name.
+  eyebrow: "Duke University \u00b7 Class of 2029",
+  headline: "Electrical & Computer Engineering + Computer Science",
   intro:
     "I build across the whole stack: firmware and sensor hardware, mechanical parts cut on a CNC mill, and the apps and backends that sit on top. Here's what I've made so far.",
   location: "Tampa, FL",
@@ -35,6 +37,19 @@ const SITE = {
   photo: { src: "images/parker.jpg", alt: "Parker Jones" },
   // One line under the intro saying what you're looking for. Leave "" to hide it.
   availability: "Looking for Summer 2027 internships in embedded systems, firmware, hardware and software.",
+
+  // Short tags under the intro for the kinds of work you want to do.
+  focus: ["Embedded systems", "Firmware", "Hardware bring-up", "Full-stack apps"],
+
+  // The "at a glance" boxes under the intro, so a recruiter gets the key facts in
+  // five seconds. Edit, reorder or delete any of them. {projects} is replaced
+  // with how many projects are listed below.
+  facts: [
+    { value: "ECE + CS", label: "Double major" },
+    { value: "3.925", label: "GPA" },
+    { value: "May 2029", label: "Graduation" },
+    { value: "Summer 2027", label: "Internship" },
+  ],
 
   contact: {
     email: "parker.t.jones07@gmail.com",

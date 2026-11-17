@@ -41,52 +41,78 @@
   /* ---------- Header ---------- */
   const first = S.name.split(" ")[0].toLowerCase();
   document.title = S.name;
-  $("nav-user").textContent = first;
+  $("brand-name").textContent = S.name;
   $("name-text").textContent = S.name;
+  $("hero-eyebrow").textContent = S.eyebrow || "";
   if (S.photo && S.photo.src) {
     $("avatar-img").src = S.photo.src;
     $("avatar-img").alt = S.photo.alt || S.name;
-    $("avatar-name").textContent = S.photo.src.split("/").pop();
     $("avatar").hidden = false;
   }
   $("headline").textContent = S.headline;
   $("intro").textContent = S.intro;
   if (S.availability) {
-    $("availability").append(el("span", { class: "tag-ok", "aria-hidden": "true" }, "[ OPEN ]"), " ", S.availability);
+    $("availability").append(el("span", { class: "status-dot", "aria-hidden": "true" }), el("span", { text: S.availability }));
   } else {
     $("availability").hidden = true;
   }
 
+  (S.focus || []).forEach((f) => $("focus").append(el("li", { text: f })));
+  if (!(S.focus || []).length) $("focus").hidden = true;
+
+  /* ---------- At-a-glance facts (for a quick skim) ---------- */
+  (S.facts || []).forEach((f) => {
+    const value = String(f.value).replace("{projects}", S.projects.length);
+    $("facts").append(el("li", { class: "fact" }, el("b", { class: "fact-value", text: value }), el("span", { class: "fact-label", text: f.label })));
+  });
+  if (!(S.facts || []).length) $("facts").hidden = true;
+
   function contactLinks() {
     const c = S.contact || {};
     const out = [];
-    if (c.email) out.push(el("a", { class: "btn btn-primary", href: "mailto:" + c.email }, "email me"));
-    if (c.resume) out.push(el("a", { class: "btn", href: c.resume, target: "_blank", rel: "noopener" }, "resume.pdf"));
-    if (c.linkedin) out.push(el("a", { class: "btn", href: c.linkedin, target: "_blank", rel: "noopener" }, "linkedin"));
-    if (c.github) out.push(el("a", { class: "btn", href: c.github, target: "_blank", rel: "noopener" }, "github"));
+    if (c.email) out.push(el("a", { class: "btn btn-primary", href: "mailto:" + c.email }, "Email me"));
+    if (c.resume) out.push(el("a", { class: "btn", href: c.resume, target: "_blank", rel: "noopener" }, "Resume (PDF)"));
+    if (c.linkedin) out.push(el("a", { class: "btn", href: c.linkedin, target: "_blank", rel: "noopener" }, "LinkedIn"));
+    if (c.github) out.push(el("a", { class: "btn", href: c.github, target: "_blank", rel: "noopener" }, "GitHub"));
     return out;
   }
   $("contact-row").append(...contactLinks());
   $("contact-row-footer").append(...contactLinks());
-  $("footer-small").textContent = "# " + [S.contact && S.contact.email, S.location].filter(Boolean).join("  ·  ");
+  {
+    const c = S.contact || {};
+    const cta = c.resume
+      ? el("a", { class: "btn btn-sm btn-primary", href: c.resume, target: "_blank", rel: "noopener" }, "Resume")
+      : c.email ? el("a", { class: "btn btn-sm btn-primary", href: "mailto:" + c.email }, "Email me") : null;
+    if (cta) $("topbar-cta").append(cta);
+    if (c.email) $("footer-sub").append("The fastest way to reach me is ", el("a", { href: "mailto:" + c.email, text: c.email }), ".");
+  }
+  $("footer-small").textContent = "© " + new Date().getFullYear() + " " + S.name + [S.location].filter(Boolean).map((l) => "  ·  " + l).join("");
 
   /* ---------- Education ---------- */
   const e = S.education;
   if (e) {
     const rows = [
-      ["school", e.school],
-      ["degree", e.degree],
-      ["gpa", e.gpa, "hl"],
-      ["graduating", e.graduation.replace(/^Expected\s*/i, "")],
-      ["coursework", (e.coursework || []).join(", ")],
+      ["School", e.school],
+      ["Degree", e.degree],
+      ["GPA", e.gpa, "hl"],
+      ["Graduation", e.graduation],
     ];
     rows.forEach(([k, v, cls]) => {
       if (!v) return;
       $("edu-list").append(el("div", { class: "kv-row" }, el("dt", { text: k }), el("dd", { class: cls || null, text: v })));
     });
+    if ((e.coursework || []).length) {
+      $("edu-list").append(el("div", { class: "kv-row" }, el("dt", { text: "Coursework" }),
+        el("dd", {}, el("ul", { class: "course-list" }, e.coursework.map((x) => el("li", { text: x }))))));
+    }
   }
 
   /* ---------- Shared bits ---------- */
+  function tagPills(p) {
+    return (p.tags || []).length
+      ? el("span", { class: "tag-pills" }, p.tags.map((t) => el("span", { class: "tag-pill", text: t })))
+      : null;
+  }
   function stack(p) {
     return p.stack && p.stack.length
       ? el("ul", { class: "stack", "aria-label": "Tools and technologies" }, p.stack.map((s) => el("li", { text: s })))
@@ -142,7 +168,8 @@
   const featured = S.projects.filter((p) => p.featured);
   const others = S.projects.filter((p) => !p.featured);
 
-  featured.forEach((p) => {
+  const status = (p) => (/present/i.test(p.dates || "") ? "Ongoing" : "Completed");
+  featured.forEach((p, n) => {
     const images = (p.images || []).filter((i) => i && i.src);
     galleries[slug(p.title)] = { project: p, images };
     const bullets = p.bullets || [];
@@ -158,15 +185,17 @@
         : null,
     ];
     const head = [
-      el("p", { class: "role" }, el("span", { class: "dim" }, "role: "), p.role),
       el("h3", { class: "feat-title", text: p.title }),
+      p.role ? el("p", { class: "role", text: p.role }) : null,
       p.subtitle ? el("p", { class: "sub", text: p.subtitle }) : null,
       p.summary ? el("p", { class: "summary", text: p.summary }) : null,
     ];
-    const pane = el("article", { class: "pane feat" + (m ? "" : " no-media"), id: slug(p.title) },
+    const pane = el("article", { class: "pane feat reveal" + (m ? "" : " no-media"), id: slug(p.title), "data-tags": (p.tags || []).join("|") },
       el("div", { class: "pane-bar" },
-        el("span", {}, "~/projects/", el("b", { text: alias(p) })),
-        el("span", { class: "dim", text: p.dates })),
+        el("span", { class: "feat-num", text: String(n + 1).padStart(2, "0") }),
+        el("span", { class: "status status-" + status(p).toLowerCase(), text: status(p) }),
+        tagPills(p),
+        el("span", { class: "feat-dates", text: p.dates })),
       m
         ? el("div", { class: "pane-body" },
             el("div", { class: "feat-head" }, head), m,
@@ -183,14 +212,12 @@
     const images = (p.images || []).filter((i) => i && i.src);
     galleries[slug(p.title)] = { project: p, images };
     $("more-list").append(
-      el("details", { class: "ls-row", id: slug(p.title) },
+      el("details", { class: "ls-row", id: slug(p.title), "data-tags": (p.tags || []).join("|") },
         el("summary", {},
-          el("span", { class: "ls-perm", "aria-hidden": "true", text: "drwxr-xr-x" }),
-          el("span", { class: "ls-date", text: p.dates }),
-          el("span", { class: "ls-name" }, el("b", { text: alias(p) + "/" })),
-          el("span", { class: "ls-desc" }, el("span", { class: "ls-title", text: p.title }), " ", el("span", { class: "dim", text: "— " + (p.summary || "") }))),
+          el("span", { class: "ls-desc" }, el("span", { class: "ls-title", text: p.title }), " ", tagPills(p), el("span", { class: "ls-summary", text: p.summary || "" })),
+          el("span", { class: "ls-date", text: p.dates })),
         el("div", { class: "ls-body" },
-          el("p", { class: "role" }, el("span", { class: "dim" }, "role: "), p.role),
+          el("p", { class: "role", text: p.role }),
           images.length ? el("div", { class: "card-thumbs" }, images.slice(0, 4).map((_, i) => imgButton(p, images, i, "thumb"))) : null,
           p.bullets && p.bullets.length ? el("ul", { class: "bullets" }, p.bullets.map((b) => el("li", { text: b }))) : null,
           stack(p), links(p))));
@@ -199,11 +226,12 @@
   /* ---------- Experience log ---------- */
   (S.experience || []).forEach((x) => {
     $("experience-list").append(
-      el("article", { class: "log-entry" },
-        el("p", { class: "log-head" },
-          el("span", { class: "log-time", text: "[" + x.dates + "]" }), " ",
-          el("span", { class: "log-lvl", text: "INFO" }), " "),
-        el("h3", { class: "log-title" }, x.title, el("span", { class: "dim", text: " · " + x.role })),
+      el("article", { class: "log-entry reveal" },
+        el("div", { class: "log-head" },
+          el("div", {},
+            el("h3", { class: "log-title", text: x.role }),
+            el("p", { class: "log-org", text: x.title })),
+          el("span", { class: "log-time", text: x.dates })),
         el("ul", { class: "bullets" }, (x.bullets || []).map((b) => el("li", { text: b })))));
   });
 
@@ -211,7 +239,7 @@
   (S.skills || []).forEach((g) => {
     $("skill-list").append(
       el("div", { class: "yaml-row" },
-        el("dt", {}, slug(g.group).replace(/-/g, "_"), el("span", { class: "dim", text: ":" })),
+        el("dt", { text: g.group }),
         el("dd", {}, el("ul", {}, g.items.map((i) => el("li", { text: i }))))));
   });
 
@@ -296,7 +324,9 @@
   function go(target, after) {
     const node = typeof target === "string" ? document.getElementById(target) : target;
     if (!node) return;
+    if (node.closest("[data-filtered-out]") || node.hasAttribute("data-filtered-out")) setFilter("All");
     if (node.tagName === "DETAILS") node.open = true;
+    node.classList.add("is-visible");
     node.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
     node.classList.remove("flash"); void node.offsetWidth; node.classList.add("flash");
     if (after) after();
@@ -414,6 +444,7 @@
         ["open <project>", "jump to a project, e.g. open pivot"],
         ["./contact.sh", "email, linkedin, github"],
         ["clear", "clear the screen"],
+        ["theme [dark|light]", "switch the site's colors"],
         ["sudo hire parker", "you know you want to"],
       ].map(([a, b]) => el("span", {}, "  ", el("b", { class: "cmd-name", text: a.padEnd(21, " ") }), el("span", { class: "dim", text: b }))),
       el("span", { class: "dim", text: "files: " + Object.keys(FILES).join("  ") + "  projects/" })),
@@ -546,4 +577,86 @@
     b.addEventListener("click", () => run(cmd));
     $("console-chips").append(b);
   });
+
+  /* ---------- Project filters ---------- */
+  function setFilter(tag) {
+    let shownF = 0, shownO = 0;
+    document.querySelectorAll("#work-list .feat, #more-list .ls-row").forEach((n) => {
+      const ok = tag === "All" || (n.dataset.tags || "").split("|").includes(tag);
+      n.hidden = !ok;
+      if (ok) n.removeAttribute("data-filtered-out"); else n.setAttribute("data-filtered-out", "");
+      if (ok) (n.classList.contains("feat") ? shownF++ : shownO++);
+    });
+    $("more").hidden = shownO === 0;
+    document.querySelectorAll("#filters button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tag === tag)));
+    $("filter-status").textContent = tag === "All" ? ""
+      : "showing " + (shownF + shownO) + " of " + S.projects.length + " projects tagged " + tag.toLowerCase()
+        + (shownF && shownO ? " (" + shownF + " featured, " + shownO + " more below)" : "");
+  }
+  const tags = ["All"].concat((S.filters || []).filter((f) => S.projects.some((p) => (p.tags || []).includes(f))));
+  if (tags.length > 2) {
+    tags.forEach((t) => {
+      const n = t === "All" ? S.projects.length : S.projects.filter((p) => (p.tags || []).includes(t)).length;
+      const b = el("button", { type: "button", class: "filter", "data-tag": t, "aria-pressed": String(t === "All") },
+        t, el("span", { class: "filter-n", text: String(n) }));
+      b.addEventListener("click", () => setFilter(t));
+      $("filters").append(b);
+    });
+  } else $("filters").hidden = true;
+
+  /* ---------- Scroll: progress bar, active nav, back-to-top ---------- */
+  const bar = $("progress-bar"), toTop = $("to-top");
+  function onScroll() {
+    const h = document.documentElement;
+    const p = h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight);
+    bar.style.transform = "scaleX(" + Math.min(1, Math.max(0, p)) + ")";
+    toTop.classList.toggle("show", h.scrollTop > 900);
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  const navLinks = [...document.querySelectorAll("#nav a")];
+  const sections = navLinks.map((a) => document.querySelector(a.getAttribute("href"))).filter(Boolean);
+  function markActive() {
+    const y = window.scrollY + window.innerHeight * 0.35;
+    let cur = null;
+    sections.forEach((sec) => { if (sec.offsetTop <= y) cur = sec.id; });
+    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) cur = "contact";
+    navLinks.forEach((a) => {
+      const on = a.getAttribute("href") === "#" + cur;
+      a.classList.toggle("active", on);
+      if (on) a.setAttribute("aria-current", "location"); else a.removeAttribute("aria-current");
+    });
+  }
+  window.addEventListener("scroll", markActive, { passive: true });
+  markActive();
+
+  /* ---------- Reveal on scroll ---------- */
+  document.querySelectorAll(".section-head, .edu-card, .yaml-row, .listing, .filters").forEach((n) => n.classList.add("reveal"));
+  if (!reduceMotion && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver((entries) => entries.forEach((en) => {
+      if (en.isIntersecting) { en.target.classList.add("is-visible"); io.unobserve(en.target); }
+    }), { rootMargin: "0px 0px -8% 0px", threshold: 0.05 });
+    document.querySelectorAll(".reveal").forEach((n) => io.observe(n));
+  } else document.querySelectorAll(".reveal").forEach((n) => n.classList.add("is-visible"));
+
+  /* ---------- Light / dark theme ---------- */
+  const root = document.documentElement, toggle = $("theme-toggle");
+  const meta = document.querySelector('meta[name="theme-color"]');
+  function applyTheme(t) {
+    root.dataset.theme = t;
+    toggle.setAttribute("aria-label", t === "dark" ? "Switch to light theme" : "Switch to dark theme");
+    if (meta) meta.content = t === "dark" ? "#111214" : "#fafaf8";
+  }
+  applyTheme(root.dataset.theme === "dark" ? "dark" : "light");
+  toggle.addEventListener("click", () => {
+    const t = root.dataset.theme === "dark" ? "light" : "dark";
+    applyTheme(t);
+    try { localStorage.setItem("theme", t); } catch (err) {}
+  });
+  commands.theme = (arg) => {
+    const t = /dark|light/.test(arg || "") ? arg.trim() : (root.dataset.theme === "dark" ? "light" : "dark");
+    applyTheme(t); try { localStorage.setItem("theme", t); } catch (err) {}
+    print("theme set to " + t);
+  };
 })();
