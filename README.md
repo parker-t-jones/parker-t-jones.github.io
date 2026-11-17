@@ -1,6 +1,6 @@
 # Parker Jones · Portfolio
 
-A plain HTML/CSS/JS site: a clean light layout by default, a dark terminal theme behind the moon/sun toggle, a rotating project showcase up top, and a pop-out terminal. No build step, no frameworks. GitHub Pages serves it as-is.
+A plain HTML/CSS/JS site: a clean light layout by default, 13 light and dark color palettes (moon/sun toggle plus a palette picker), a rotating project showcase up top, and a pop-out terminal. No build step, no frameworks. GitHub Pages serves it as-is.
 
 ## Files
 
@@ -9,6 +9,7 @@ A plain HTML/CSS/JS site: a clean light layout by default, a dark terminal theme
 | `content.js` | Every word on the site: intro, photo, education, projects, work, skills, links | **Yes, this is the one** |
 | `images/` | Your photo, project photos and screenshots, and `og-card.png` (the link-preview image) | Add files here |
 | `index.html` | Page skeleton | Rarely |
+| `themes.js` | The color palettes in the palette picker (Paper, Solarized, Gruvbox, Dracula, Nord, …). Copy a block to add your own | Optional |
 | `styles.css` | Colors, fonts, layout (light colors are the `--` variables at the top, dark ones right below) | Only to change the look |
 | `main.js` | Turns `content.js` into the page and runs the terminal | No |
 
@@ -43,8 +44,12 @@ If the page goes blank after an edit, it's almost always a missing comma or quot
 
 ## The terminal
 
-The terminal opens from the **>_ Terminal** button in the top bar, the link under the intro, or the backtick key (`` ` ``); Esc or `exit` closes it. It's optional for visitors; everything on the page reads without it. Commands: `help`, `theme dark|light`, `whoami`, `ls`, `open <name>`, `education`, `experience`, `skills`, `contact`, `resume`, `clear`, and `sudo hire parker`. Tab completes, and the up arrow recalls earlier commands.
+The terminal opens from the **>_ Terminal** button in the top bar, the link under the intro, or the backtick key (`` ` ``); Esc or `exit` closes it. It's optional for visitors; everything on the page reads without it. Commands: `help`, `theme <name>` / `theme list`, `whoami`, `ls`, `open <name>`, `education`, `experience`, `skills`, `contact`, `resume`, `clear`, and `sudo hire parker`. Tab completes, and the up arrow recalls earlier commands.
 
 ## Previewing locally (optional)
 
 From this folder run `python3 -m http.server` and visit http://localhost:8000.
+
+## On phones
+
+Project write-ups, coursework and skill groups fold into tap-to-open dropdowns, and project photos (plus the showcase at the top) swipe sideways. On wider screens everything stays open.

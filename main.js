@@ -103,7 +103,9 @@
     });
     if ((e.coursework || []).length) {
       $("edu-list").append(el("div", { class: "kv-row" }, el("dt", { text: "Coursework" }),
-        el("dd", {}, el("ul", { class: "course-list" }, e.coursework.map((x) => el("li", { text: x }))))));
+        el("dd", {}, el("details", { class: "m-collapse", open: "" },
+          el("summary", {}, el("span", { class: "open-label", text: "Show " + e.coursework.length + " courses" }), el("span", { class: "close-label", text: "Hide courses" })),
+          el("ul", { class: "course-list" }, e.coursework.map((x) => el("li", { text: x })))))));
     }
   }
 
@@ -144,7 +146,23 @@
     const rest = images.map((_, i) => i).filter((i) => !lead.includes(i));
     const shown = rest.slice(0, 6), hidden = rest.length - shown.length;
     const cap = images[lead[0]].caption;
-    return el("div", { class: "feat-media" },
+    // phones: one swipeable row of every image, with a counter
+    const swipe = images.length
+      ? el("div", { class: "swipe" },
+          el("div", { class: "swipe-track", tabindex: "-1" }, images.map((_, i) => imgButton(p, images, i, "swipe-img"))),
+          images.length > 1 ? el("p", { class: "swipe-meta" }, el("span", { class: "swipe-count", text: "1 / " + images.length }), el("span", { class: "dim", text: " · swipe for more" })) : null)
+      : null;
+    if (swipe && images.length > 1) {
+      const track = swipe.firstChild, count = swipe.querySelector(".swipe-count");
+      track.addEventListener("scroll", () => {
+        const items = [...track.children];
+        const mid = track.scrollLeft + track.clientWidth / 2;
+        let best = 0, bd = Infinity;
+        items.forEach((it, i) => { const d = Math.abs(it.offsetLeft + it.offsetWidth / 2 - mid); if (d < bd) { bd = d; best = i; } });
+        count.textContent = (best + 1) + " / " + images.length;
+      }, { passive: true });
+    }
+    return el("div", { class: "feat-media" }, swipe,
       el("figure", { class: "lead" + (lead.length > 1 ? " lead-phones" : "") },
         el("div", { class: "lead-row" }, lead.map((i) => imgButton(p, images, i, "lead-img"))),
         cap && lead.length === 1 ? el("figcaption", {}, el("span", { class: "dim" }, "// "), cap) : null),
@@ -161,6 +179,16 @@
         ? el("button", { type: "button", class: "view-all", "data-project": slug(p.title), "data-index": "0" },
             "view all " + images.length + " images →")
         : null);
+  }
+
+  // On phones, long write-ups fold into a "Show details" dropdown; on wider
+  // screens they're always open (see syncCollapses below).
+  function collapse(...args) {
+    const n = args.pop();
+    return el("details", { class: "m-collapse feat-details", open: "" },
+      el("summary", {}, el("span", { class: "open-label", text: "Show details" + (n ? " · " + n + " points" : "") }),
+        el("span", { class: "close-label", text: "Hide details" })),
+      el("div", { class: "m-collapse-body" }, args.flat()));
   }
 
   /* ---------- Selected work: one pane per project ---------- */
@@ -199,10 +227,10 @@
       m
         ? el("div", { class: "pane-body" },
             el("div", { class: "feat-head" }, head), m,
-            el("div", { class: "feat-body" }, bulletBlock, stack(p), links(p)))
+            el("div", { class: "feat-body" }, collapse(bulletBlock, stack(p), bullets.length), links(p)))
         : el("div", { class: "pane-body" },
-            el("div", { class: "feat-head" }, head, stack(p), links(p)),
-            el("div", { class: "feat-side" }, bulletBlock)));
+            el("div", { class: "feat-head" }, head, links(p)),
+            el("div", { class: "feat-side" }, collapse(bulletBlock, stack(p), bullets.length))));
     $("work-list").append(pane);
   });
 
@@ -240,7 +268,10 @@
     $("skill-list").append(
       el("div", { class: "yaml-row" },
         el("dt", { text: g.group }),
-        el("dd", {}, el("ul", {}, g.items.map((i) => el("li", { text: i }))))));
+        el("dd", {}, el("details", { class: "m-collapse", open: "" },
+          el("summary", {}, el("span", {}, el("b", { text: g.group }), el("span", { class: "dim", text: "  " + g.items.length })),
+            el("span", { class: "visually-hidden", text: " skills" })),
+          el("ul", {}, g.items.map((i) => el("li", { text: i })))))));
   });
 
   /* ---------- Image viewer ---------- */
@@ -446,7 +477,7 @@
         ["./contact.sh", "email, linkedin, github"],
         ["clear", "clear the screen"],
         ["exit", "close the terminal (or press Esc)"],
-        ["theme [dark|light]", "switch the site's colors"],
+        ["theme [name|list]", "change colors, e.g. theme dracula"],
         ["sudo hire parker", "you know you want to"],
       ].map(([a, b]) => el("span", {}, "  ", el("b", { class: "cmd-name", text: a.padEnd(21, " ") }), el("span", { class: "dim", text: b }))),
       el("span", { class: "dim", text: "files: " + Object.keys(FILES).join("  ") + "  projects/" })),
@@ -642,24 +673,69 @@
     document.querySelectorAll(".reveal").forEach((n) => io.observe(n));
   } else document.querySelectorAll(".reveal").forEach((n) => n.classList.add("is-visible"));
 
-  /* ---------- Light / dark theme ---------- */
+  /* ---------- Color palettes + light/dark ---------- */
   const root = document.documentElement, toggle = $("theme-toggle");
-  const meta = document.querySelector('meta[name="theme-color"]');
-  function applyTheme(t) {
-    root.dataset.theme = t;
-    toggle.setAttribute("aria-label", t === "dark" ? "Switch to light theme" : "Switch to dark theme");
-    if (meta) meta.content = t === "dark" ? "#111214" : "#fafaf8";
+  const THEMES = window.THEMES || [];
+  const palBtn = $("palette-toggle"), palMenu = $("palette-menu");
+  const store = (k, v) => { try { localStorage.setItem(k, v); } catch (err) {} };
+  const recall = (k) => { try { return localStorage.getItem(k); } catch (err) { return null; } };
+  function setPalette(id, quiet) {
+    if (!window.applyTheme) return null;
+    const t = window.applyTheme(id);
+    store("palette", t.id); store("palette-" + t.mode, t.id);
+    toggle.setAttribute("aria-label", t.mode === "dark" ? "Switch to a light palette" : "Switch to a dark palette");
+    palMenu.querySelectorAll("[data-id]").forEach((b2) => b2.setAttribute("aria-pressed", String(b2.dataset.id === t.id)));
+    return t;
   }
-  applyTheme(root.dataset.theme === "dark" ? "dark" : "light");
-  toggle.addEventListener("click", () => {
-    const t = root.dataset.theme === "dark" ? "light" : "dark";
-    applyTheme(t);
-    try { localStorage.setItem("theme", t); } catch (err) {}
+  function swatch(t) {
+    return el("span", { class: "sw", "aria-hidden": "true", style: "background:" + t.bg + ";border-color:" + t.line2 },
+      el("i", { style: "background:" + t.accent }), el("i", { style: "background:" + t.ink }), el("i", { style: "background:" + t.ok }));
+  }
+  ["light", "dark"].forEach((mode) => {
+    const list = THEMES.filter((t) => t.mode === mode);
+    if (!list.length) return;
+    palMenu.append(el("p", { class: "pal-group", text: mode === "light" ? "Light" : "Dark" }));
+    const grid = el("div", { class: "pal-grid" });
+    list.forEach((t) => {
+      const b2 = el("button", { type: "button", class: "pal-item", "data-id": t.id, "aria-pressed": "false" }, swatch(t), el("span", { text: t.name }));
+      b2.addEventListener("click", () => setPalette(t.id));
+      grid.append(b2);
+    });
+    palMenu.append(grid);
   });
-  commands.theme = (arg) => {
-    const t = /dark|light/.test(arg || "") ? arg.trim() : (root.dataset.theme === "dark" ? "light" : "dark");
-    applyTheme(t); try { localStorage.setItem("theme", t); } catch (err) {}
-    print("theme set to " + t);
+  function openPal() { palMenu.hidden = false; palBtn.setAttribute("aria-expanded", "true"); (palMenu.querySelector('[aria-pressed="true"]') || palMenu.querySelector("button")).focus(); }
+  function closePal(refocus) { if (palMenu.hidden) return; palMenu.hidden = true; palBtn.setAttribute("aria-expanded", "false"); if (refocus) palBtn.focus(); }
+  palBtn.addEventListener("click", () => (palMenu.hidden ? openPal() : closePal()));
+  document.addEventListener("click", (ev) => { if (!ev.target.closest(".palette-wrap")) closePal(); });
+  palMenu.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape") { ev.stopPropagation(); closePal(true); }
+    if (/^Arrow/.test(ev.key)) {
+      const items = [...palMenu.querySelectorAll(".pal-item")];
+      const i = items.indexOf(document.activeElement);
+      if (i < 0) return;
+      ev.preventDefault();
+      const step = ev.key === "ArrowDown" ? 2 : ev.key === "ArrowUp" ? -2 : ev.key === "ArrowRight" ? 1 : -1;
+      items[Math.max(0, Math.min(items.length - 1, i + step))].focus();
+    }
+  });
+  setPalette(root.dataset.palette || "paper");
+  toggle.addEventListener("click", () => {
+    const mode = root.dataset.theme === "dark" ? "light" : "dark";
+    const first = THEMES.find((t) => t.mode === mode);
+    setPalette(recall("palette-" + mode) || (first && first.id));
+  });
+  commands.theme = commands.palette = (arg) => {
+    const q = slug(arg || "");
+    if (!q || q === "list" || q === "ls") {
+      return print("palettes:", ...["light", "dark"].map((m) => el("span", {}, el("span", { class: "dim", text: (m + ":").padEnd(7, " ") }),
+        ...THEMES.filter((t) => t.mode === m).flatMap((t, i) => [i ? "  " : "", runLink("theme " + t.id, t.id)]))),
+        el("span", { class: "dim", text: "usage: theme <name> | theme dark | theme light" }));
+    }
+    let t = THEMES.find((x) => x.id === q) || THEMES.find((x) => x.id.startsWith(q) || slug(x.name).startsWith(q));
+    if (!t && (q === "dark" || q === "light")) t = THEMES.find((x) => x.id === recall("palette-" + q)) || THEMES.find((x) => x.mode === q);
+    if (!t) return print("theme: no palette named '" + arg + "'. try theme list");
+    setPalette(t.id);
+    print("palette set to " + t.name);
   };
 
   /* ---------- Terminal pop-out ---------- */
@@ -698,13 +774,13 @@
   if (shots.length) {
     const frame = $("showcase-frame"), cap = $("showcase-text"), dots = $("showcase-dots");
     $("showcase").hidden = false;
-    let cur = 0, timer = null;
+    let cur = 0, timer = null, swiped = false;
     const slides = shots.map((x, i) => {
       const proj = x.project && S.projects.find((p) => p.title === x.project);
       const b = el("button", { type: "button", class: "slide" + (x.kind === "phone" ? " is-phone" : "") + (i === 0 ? " on" : ""),
           "aria-label": (x.alt || "Project image") + (proj ? ", open " + proj.title : ""), tabindex: i === 0 ? "0" : "-1" },
         el("img", { src: x.src, alt: "", loading: i === 0 ? "eager" : "lazy", decoding: "async" }));
-      b.addEventListener("click", () => { if (proj) go(slug(proj.title)); });
+      b.addEventListener("click", () => { if (swiped) return; if (proj) go(slug(proj.title)); });
       frame.append(b);
       return { el: b, data: x, proj };
     });
@@ -731,9 +807,28 @@
       clearInterval(timer);
       if (!reduceMotion && slides.length > 1) timer = setInterval(() => show(cur + 1), 5000);
     }
+    // swipe left/right on phones (and drag with a mouse) to change images
+    let sx = null, sy = null;
+    frame.addEventListener("pointerdown", (ev) => { sx = ev.clientX; sy = ev.clientY; swiped = false; });
+    frame.addEventListener("pointerup", (ev) => {
+      if (sx === null) return;
+      const dx = ev.clientX - sx, dy = ev.clientY - sy;
+      sx = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { swiped = true; show(cur + (dx < 0 ? 1 : -1)); restart(); setTimeout(() => { swiped = false; }, 50); }
+    });
+    frame.addEventListener("pointercancel", () => { sx = null; });
     $("showcase").addEventListener("mouseenter", () => clearInterval(timer));
     $("showcase").addEventListener("mouseleave", restart);
     $("showcase").addEventListener("focusin", () => clearInterval(timer));
     show(0); restart();
   }
+
+  /* ---------- Phone-only dropdowns ---------- */
+  const phone = window.matchMedia("(max-width: 760px)");
+  function syncCollapses() {
+    document.querySelectorAll(".m-collapse").forEach((d) => { d.open = !phone.matches; });
+    if (phone.matches) document.querySelectorAll(".more-detail").forEach((d) => { d.open = true; });
+  }
+  syncCollapses();
+  (phone.addEventListener ? phone.addEventListener("change", syncCollapses) : phone.addListener(syncCollapses));
 })();
