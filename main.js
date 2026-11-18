@@ -41,52 +41,80 @@
   /* ---------- Header ---------- */
   const first = S.name.split(" ")[0].toLowerCase();
   document.title = S.name;
-  $("nav-user").textContent = first;
+  $("brand-name").textContent = S.name;
   $("name-text").textContent = S.name;
+  $("hero-eyebrow").textContent = S.eyebrow || "";
   if (S.photo && S.photo.src) {
     $("avatar-img").src = S.photo.src;
     $("avatar-img").alt = S.photo.alt || S.name;
-    $("avatar-name").textContent = S.photo.src.split("/").pop();
     $("avatar").hidden = false;
   }
   $("headline").textContent = S.headline;
   $("intro").textContent = S.intro;
   if (S.availability) {
-    $("availability").append(el("span", { class: "tag-ok", "aria-hidden": "true" }, "[ OPEN ]"), " ", S.availability);
+    $("availability").append(el("span", { class: "status-dot", "aria-hidden": "true" }), el("span", { text: S.availability }));
   } else {
     $("availability").hidden = true;
   }
 
+  (S.focus || []).forEach((f) => $("focus").append(el("li", { text: f })));
+  if (!(S.focus || []).length) $("focus").hidden = true;
+
+  /* ---------- At-a-glance facts (for a quick skim) ---------- */
+  (S.facts || []).forEach((f) => {
+    const value = String(f.value).replace("{projects}", S.projects.length);
+    $("facts").append(el("li", { class: "fact" }, el("b", { class: "fact-value", text: value }), el("span", { class: "fact-label", text: f.label })));
+  });
+  if (!(S.facts || []).length) $("facts").hidden = true;
+
   function contactLinks() {
     const c = S.contact || {};
     const out = [];
-    if (c.email) out.push(el("a", { class: "btn btn-primary", href: "mailto:" + c.email }, "email me"));
-    if (c.resume) out.push(el("a", { class: "btn", href: c.resume, target: "_blank", rel: "noopener" }, "resume.pdf"));
-    if (c.linkedin) out.push(el("a", { class: "btn", href: c.linkedin, target: "_blank", rel: "noopener" }, "linkedin"));
-    if (c.github) out.push(el("a", { class: "btn", href: c.github, target: "_blank", rel: "noopener" }, "github"));
+    if (c.email) out.push(el("a", { class: "btn btn-primary", href: "mailto:" + c.email }, "Email me"));
+    if (c.resume) out.push(el("a", { class: "btn", href: c.resume, target: "_blank", rel: "noopener" }, "Resume (PDF)"));
+    if (c.linkedin) out.push(el("a", { class: "btn", href: c.linkedin, target: "_blank", rel: "noopener" }, "LinkedIn"));
+    if (c.github) out.push(el("a", { class: "btn", href: c.github, target: "_blank", rel: "noopener" }, "GitHub"));
     return out;
   }
   $("contact-row").append(...contactLinks());
   $("contact-row-footer").append(...contactLinks());
-  $("footer-small").textContent = "# " + [S.contact && S.contact.email, S.location].filter(Boolean).join("  ·  ");
+  {
+    const c = S.contact || {};
+    const cta = c.resume
+      ? el("a", { class: "btn btn-sm btn-primary", href: c.resume, target: "_blank", rel: "noopener" }, "Resume")
+      : c.email ? el("a", { class: "btn btn-sm btn-primary", href: "mailto:" + c.email }, "Email me") : null;
+    if (cta) $("topbar-cta").append(cta);
+    if (c.email) $("footer-sub").append("The fastest way to reach me is ", el("a", { href: "mailto:" + c.email, text: c.email }), ".");
+  }
+  $("footer-small").textContent = "© " + new Date().getFullYear() + " " + S.name + [S.location].filter(Boolean).map((l) => "  ·  " + l).join("");
 
   /* ---------- Education ---------- */
   const e = S.education;
   if (e) {
     const rows = [
-      ["school", e.school],
-      ["degree", e.degree],
-      ["gpa", e.gpa, "hl"],
-      ["graduating", e.graduation.replace(/^Expected\s*/i, "")],
-      ["coursework", (e.coursework || []).join(", ")],
+      ["School", e.school],
+      ["Degree", e.degree],
+      ["GPA", e.gpa, "hl"],
+      ["Graduation", e.graduation],
     ];
     rows.forEach(([k, v, cls]) => {
       if (!v) return;
       $("edu-list").append(el("div", { class: "kv-row" }, el("dt", { text: k }), el("dd", { class: cls || null, text: v })));
     });
+    if ((e.coursework || []).length) {
+      $("edu-list").append(el("div", { class: "kv-row" }, el("dt", { text: "Coursework" }),
+        el("dd", {}, el("details", { class: "m-collapse", open: "" },
+          el("summary", {}, el("span", { class: "open-label", text: "Show " + e.coursework.length + " courses" }), el("span", { class: "close-label", text: "Hide courses" })),
+          el("ul", { class: "course-list" }, e.coursework.map((x) => el("li", { text: x })))))));
+    }
   }
 
   /* ---------- Shared bits ---------- */
+  function tagPills(p) {
+    return (p.tags || []).length
+      ? el("span", { class: "tag-pills" }, p.tags.map((t) => el("span", { class: "tag-pill", text: t })))
+      : null;
+  }
   function stack(p) {
     return p.stack && p.stack.length
       ? el("ul", { class: "stack", "aria-label": "Tools and technologies" }, p.stack.map((s) => el("li", { text: s })))
@@ -118,7 +146,23 @@
     const rest = images.map((_, i) => i).filter((i) => !lead.includes(i));
     const shown = rest.slice(0, 6), hidden = rest.length - shown.length;
     const cap = images[lead[0]].caption;
-    return el("div", { class: "feat-media" },
+    // phones: one swipeable row of every image, with a counter
+    const swipe = images.length
+      ? el("div", { class: "swipe" },
+          el("div", { class: "swipe-track", tabindex: "-1" }, images.map((_, i) => imgButton(p, images, i, "swipe-img"))),
+          images.length > 1 ? el("p", { class: "swipe-meta" }, el("span", { class: "swipe-count", text: "1 / " + images.length }), el("span", { class: "dim", text: " · swipe for more" })) : null)
+      : null;
+    if (swipe && images.length > 1) {
+      const track = swipe.firstChild, count = swipe.querySelector(".swipe-count");
+      track.addEventListener("scroll", () => {
+        const items = [...track.children];
+        const mid = track.scrollLeft + track.clientWidth / 2;
+        let best = 0, bd = Infinity;
+        items.forEach((it, i) => { const d = Math.abs(it.offsetLeft + it.offsetWidth / 2 - mid); if (d < bd) { bd = d; best = i; } });
+        count.textContent = (best + 1) + " / " + images.length;
+      }, { passive: true });
+    }
+    return el("div", { class: "feat-media" }, swipe,
       el("figure", { class: "lead" + (lead.length > 1 ? " lead-phones" : "") },
         el("div", { class: "lead-row" }, lead.map((i) => imgButton(p, images, i, "lead-img"))),
         cap && lead.length === 1 ? el("figcaption", {}, el("span", { class: "dim" }, "// "), cap) : null),
@@ -137,12 +181,23 @@
         : null);
   }
 
+  // On phones, long write-ups fold into a "Show details" dropdown; on wider
+  // screens they're always open (see syncCollapses below).
+  function collapse(...args) {
+    const n = args.pop();
+    return el("details", { class: "m-collapse feat-details", open: "" },
+      el("summary", {}, el("span", { class: "open-label", text: "Show details" + (n ? " · " + n + " points" : "") }),
+        el("span", { class: "close-label", text: "Hide details" })),
+      el("div", { class: "m-collapse-body" }, args.flat()));
+  }
+
   /* ---------- Selected work: one pane per project ---------- */
   const galleries = {};
   const featured = S.projects.filter((p) => p.featured);
   const others = S.projects.filter((p) => !p.featured);
 
-  featured.forEach((p) => {
+  const status = (p) => (/present/i.test(p.dates || "") ? "Ongoing" : "Completed");
+  featured.forEach((p, n) => {
     const images = (p.images || []).filter((i) => i && i.src);
     galleries[slug(p.title)] = { project: p, images };
     const bullets = p.bullets || [];
@@ -158,22 +213,24 @@
         : null,
     ];
     const head = [
-      el("p", { class: "role" }, el("span", { class: "dim" }, "role: "), p.role),
       el("h3", { class: "feat-title", text: p.title }),
+      p.role ? el("p", { class: "role", text: p.role }) : null,
       p.subtitle ? el("p", { class: "sub", text: p.subtitle }) : null,
       p.summary ? el("p", { class: "summary", text: p.summary }) : null,
     ];
-    const pane = el("article", { class: "pane feat" + (m ? "" : " no-media"), id: slug(p.title) },
+    const pane = el("article", { class: "pane feat reveal" + (m ? "" : " no-media"), id: slug(p.title), "data-tags": (p.tags || []).join("|") },
       el("div", { class: "pane-bar" },
-        el("span", {}, "~/projects/", el("b", { text: alias(p) })),
-        el("span", { class: "dim", text: p.dates })),
+        el("span", { class: "feat-num", text: String(n + 1).padStart(2, "0") }),
+        el("span", { class: "status status-" + status(p).toLowerCase(), text: status(p) }),
+        tagPills(p),
+        el("span", { class: "feat-dates", text: p.dates })),
       m
         ? el("div", { class: "pane-body" },
             el("div", { class: "feat-head" }, head), m,
-            el("div", { class: "feat-body" }, bulletBlock, stack(p), links(p)))
+            el("div", { class: "feat-body" }, collapse(bulletBlock, stack(p), bullets.length), links(p)))
         : el("div", { class: "pane-body" },
-            el("div", { class: "feat-head" }, head, stack(p), links(p)),
-            el("div", { class: "feat-side" }, bulletBlock)));
+            el("div", { class: "feat-head" }, head, links(p)),
+            el("div", { class: "feat-side" }, collapse(bulletBlock, stack(p), bullets.length))));
     $("work-list").append(pane);
   });
 
@@ -183,14 +240,12 @@
     const images = (p.images || []).filter((i) => i && i.src);
     galleries[slug(p.title)] = { project: p, images };
     $("more-list").append(
-      el("details", { class: "ls-row", id: slug(p.title) },
+      el("details", { class: "ls-row", id: slug(p.title), "data-tags": (p.tags || []).join("|") },
         el("summary", {},
-          el("span", { class: "ls-perm", "aria-hidden": "true", text: "drwxr-xr-x" }),
-          el("span", { class: "ls-date", text: p.dates }),
-          el("span", { class: "ls-name" }, el("b", { text: alias(p) + "/" })),
-          el("span", { class: "ls-desc" }, el("span", { class: "ls-title", text: p.title }), " ", el("span", { class: "dim", text: "— " + (p.summary || "") }))),
+          el("span", { class: "ls-desc" }, el("span", { class: "ls-title", text: p.title }), " ", tagPills(p), el("span", { class: "ls-summary", text: p.summary || "" })),
+          el("span", { class: "ls-date", text: p.dates })),
         el("div", { class: "ls-body" },
-          el("p", { class: "role" }, el("span", { class: "dim" }, "role: "), p.role),
+          el("p", { class: "role", text: p.role }),
           images.length ? el("div", { class: "card-thumbs" }, images.slice(0, 4).map((_, i) => imgButton(p, images, i, "thumb"))) : null,
           p.bullets && p.bullets.length ? el("ul", { class: "bullets" }, p.bullets.map((b) => el("li", { text: b }))) : null,
           stack(p), links(p))));
@@ -199,11 +254,12 @@
   /* ---------- Experience log ---------- */
   (S.experience || []).forEach((x) => {
     $("experience-list").append(
-      el("article", { class: "log-entry" },
-        el("p", { class: "log-head" },
-          el("span", { class: "log-time", text: "[" + x.dates + "]" }), " ",
-          el("span", { class: "log-lvl", text: "INFO" }), " "),
-        el("h3", { class: "log-title" }, x.title, el("span", { class: "dim", text: " · " + x.role })),
+      el("article", { class: "log-entry reveal" },
+        el("div", { class: "log-head" },
+          el("div", {},
+            el("h3", { class: "log-title", text: x.role }),
+            el("p", { class: "log-org", text: x.title })),
+          el("span", { class: "log-time", text: x.dates })),
         el("ul", { class: "bullets" }, (x.bullets || []).map((b) => el("li", { text: b })))));
   });
 
@@ -211,8 +267,11 @@
   (S.skills || []).forEach((g) => {
     $("skill-list").append(
       el("div", { class: "yaml-row" },
-        el("dt", {}, slug(g.group).replace(/-/g, "_"), el("span", { class: "dim", text: ":" })),
-        el("dd", {}, el("ul", {}, g.items.map((i) => el("li", { text: i }))))));
+        el("dt", { text: g.group }),
+        el("dd", {}, el("details", { class: "m-collapse", open: "" },
+          el("summary", {}, el("span", {}, el("b", { text: g.group }), el("span", { class: "dim", text: "  " + g.items.length })),
+            el("span", { class: "visually-hidden", text: " skills" })),
+          el("ul", {}, g.items.map((i) => el("li", { text: i })))))));
   });
 
   /* ---------- Image viewer ---------- */
@@ -296,7 +355,10 @@
   function go(target, after) {
     const node = typeof target === "string" ? document.getElementById(target) : target;
     if (!node) return;
+    if (node.closest("[data-filtered-out]") || node.hasAttribute("data-filtered-out")) setFilter("All");
     if (node.tagName === "DETAILS") node.open = true;
+    node.classList.add("is-visible");
+    if (window.matchMedia("(max-width: 760px)").matches) closeTerm();
     node.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
     node.classList.remove("flash"); void node.offsetWidth; node.classList.add("flash");
     if (after) after();
@@ -414,6 +476,8 @@
         ["open <project>", "jump to a project, e.g. open pivot"],
         ["./contact.sh", "email, linkedin, github"],
         ["clear", "clear the screen"],
+        ["exit", "close the terminal (or press Esc)"],
+        ["theme [name|list]", "change colors, e.g. theme dracula"],
         ["sudo hire parker", "you know you want to"],
       ].map(([a, b]) => el("span", {}, "  ", el("b", { class: "cmd-name", text: a.padEnd(21, " ") }), el("span", { class: "dim", text: b }))),
       el("span", { class: "dim", text: "files: " + Object.keys(FILES).join("  ") + "  projects/" })),
@@ -546,4 +610,225 @@
     b.addEventListener("click", () => run(cmd));
     $("console-chips").append(b);
   });
+
+  /* ---------- Project filters ---------- */
+  function setFilter(tag) {
+    let shownF = 0, shownO = 0;
+    document.querySelectorAll("#work-list .feat, #more-list .ls-row").forEach((n) => {
+      const ok = tag === "All" || (n.dataset.tags || "").split("|").includes(tag);
+      n.hidden = !ok;
+      if (ok) n.removeAttribute("data-filtered-out"); else n.setAttribute("data-filtered-out", "");
+      if (ok) (n.classList.contains("feat") ? shownF++ : shownO++);
+    });
+    $("more").hidden = shownO === 0;
+    document.querySelectorAll("#filters button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tag === tag)));
+    $("filter-status").textContent = tag === "All" ? ""
+      : "showing " + (shownF + shownO) + " of " + S.projects.length + " projects tagged " + tag.toLowerCase()
+        + (shownF && shownO ? " (" + shownF + " featured, " + shownO + " more below)" : "");
+  }
+  const tags = ["All"].concat((S.filters || []).filter((f) => S.projects.some((p) => (p.tags || []).includes(f))));
+  if (tags.length > 2) {
+    tags.forEach((t) => {
+      const n = t === "All" ? S.projects.length : S.projects.filter((p) => (p.tags || []).includes(t)).length;
+      const b = el("button", { type: "button", class: "filter", "data-tag": t, "aria-pressed": String(t === "All") },
+        t, el("span", { class: "filter-n", text: String(n) }));
+      b.addEventListener("click", () => setFilter(t));
+      $("filters").append(b);
+    });
+  } else $("filters").hidden = true;
+
+  /* ---------- Scroll: progress bar, active nav, back-to-top ---------- */
+  const bar = $("progress-bar"), toTop = $("to-top");
+  function onScroll() {
+    const h = document.documentElement;
+    const p = h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight);
+    bar.style.transform = "scaleX(" + Math.min(1, Math.max(0, p)) + ")";
+    toTop.classList.toggle("show", h.scrollTop > 900);
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  const navLinks = [...document.querySelectorAll("#nav a")];
+  const sections = navLinks.map((a) => document.querySelector(a.getAttribute("href"))).filter(Boolean);
+  function markActive() {
+    const y = window.scrollY + window.innerHeight * 0.35;
+    let cur = null;
+    sections.forEach((sec) => { if (sec.offsetTop <= y) cur = sec.id; });
+    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) cur = "contact";
+    navLinks.forEach((a) => {
+      const on = a.getAttribute("href") === "#" + cur;
+      a.classList.toggle("active", on);
+      if (on) a.setAttribute("aria-current", "location"); else a.removeAttribute("aria-current");
+    });
+  }
+  window.addEventListener("scroll", markActive, { passive: true });
+  markActive();
+
+  /* ---------- Reveal on scroll ---------- */
+  document.querySelectorAll(".section-head, .edu-card, .yaml-row, .listing, .filters").forEach((n) => n.classList.add("reveal"));
+  if (!reduceMotion && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver((entries) => entries.forEach((en) => {
+      if (en.isIntersecting) { en.target.classList.add("is-visible"); io.unobserve(en.target); }
+    }), { rootMargin: "0px 0px -8% 0px", threshold: 0.05 });
+    document.querySelectorAll(".reveal").forEach((n) => io.observe(n));
+  } else document.querySelectorAll(".reveal").forEach((n) => n.classList.add("is-visible"));
+
+  /* ---------- Color palettes + light/dark ---------- */
+  const root = document.documentElement, toggle = $("theme-toggle");
+  const THEMES = window.THEMES || [];
+  const palBtn = $("palette-toggle"), palMenu = $("palette-menu");
+  const store = (k, v) => { try { localStorage.setItem(k, v); } catch (err) {} };
+  const recall = (k) => { try { return localStorage.getItem(k); } catch (err) { return null; } };
+  function setPalette(id, quiet) {
+    if (!window.applyTheme) return null;
+    const t = window.applyTheme(id);
+    store("palette", t.id); store("palette-" + t.mode, t.id);
+    toggle.setAttribute("aria-label", t.mode === "dark" ? "Switch to a light palette" : "Switch to a dark palette");
+    palMenu.querySelectorAll("[data-id]").forEach((b2) => b2.setAttribute("aria-pressed", String(b2.dataset.id === t.id)));
+    return t;
+  }
+  function swatch(t) {
+    return el("span", { class: "sw", "aria-hidden": "true", style: "background:" + t.bg + ";border-color:" + t.line2 },
+      el("i", { style: "background:" + t.accent }), el("i", { style: "background:" + t.ink }), el("i", { style: "background:" + t.ok }));
+  }
+  ["light", "dark"].forEach((mode) => {
+    const list = THEMES.filter((t) => t.mode === mode);
+    if (!list.length) return;
+    palMenu.append(el("p", { class: "pal-group", text: mode === "light" ? "Light" : "Dark" }));
+    const grid = el("div", { class: "pal-grid" });
+    list.forEach((t) => {
+      const b2 = el("button", { type: "button", class: "pal-item", "data-id": t.id, "aria-pressed": "false" }, swatch(t), el("span", { text: t.name }));
+      b2.addEventListener("click", () => setPalette(t.id));
+      grid.append(b2);
+    });
+    palMenu.append(grid);
+  });
+  function openPal() { palMenu.hidden = false; palBtn.setAttribute("aria-expanded", "true"); (palMenu.querySelector('[aria-pressed="true"]') || palMenu.querySelector("button")).focus(); }
+  function closePal(refocus) { if (palMenu.hidden) return; palMenu.hidden = true; palBtn.setAttribute("aria-expanded", "false"); if (refocus) palBtn.focus(); }
+  palBtn.addEventListener("click", () => (palMenu.hidden ? openPal() : closePal()));
+  document.addEventListener("click", (ev) => { if (!ev.target.closest(".palette-wrap")) closePal(); });
+  palMenu.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape") { ev.stopPropagation(); closePal(true); }
+    if (/^Arrow/.test(ev.key)) {
+      const items = [...palMenu.querySelectorAll(".pal-item")];
+      const i = items.indexOf(document.activeElement);
+      if (i < 0) return;
+      ev.preventDefault();
+      const step = ev.key === "ArrowDown" ? 2 : ev.key === "ArrowUp" ? -2 : ev.key === "ArrowRight" ? 1 : -1;
+      items[Math.max(0, Math.min(items.length - 1, i + step))].focus();
+    }
+  });
+  setPalette(root.dataset.palette || "paper");
+  toggle.addEventListener("click", () => {
+    const mode = root.dataset.theme === "dark" ? "light" : "dark";
+    const first = THEMES.find((t) => t.mode === mode);
+    setPalette(recall("palette-" + mode) || (first && first.id));
+  });
+  commands.theme = commands.palette = (arg) => {
+    const q = slug(arg || "");
+    if (!q || q === "list" || q === "ls") {
+      return print("palettes:", ...["light", "dark"].map((m) => el("span", {}, el("span", { class: "dim", text: (m + ":").padEnd(7, " ") }),
+        ...THEMES.filter((t) => t.mode === m).flatMap((t, i) => [i ? "  " : "", runLink("theme " + t.id, t.id)]))),
+        el("span", { class: "dim", text: "usage: theme <name> | theme dark | theme light" }));
+    }
+    let t = THEMES.find((x) => x.id === q) || THEMES.find((x) => x.id.startsWith(q) || slug(x.name).startsWith(q));
+    if (!t && (q === "dark" || q === "light")) t = THEMES.find((x) => x.id === recall("palette-" + q)) || THEMES.find((x) => x.mode === q);
+    if (!t) return print("theme: no palette named '" + arg + "'. try theme list");
+    setPalette(t.id);
+    print("palette set to " + t.name);
+  };
+
+  /* ---------- Terminal pop-out ---------- */
+  const term = $("console"), termBtn = $("term-toggle");
+  function openTerm() {
+    if (!term.hidden) return input.focus({ preventScroll: true });
+    term.hidden = false;
+    requestAnimationFrame(() => term.classList.add("open"));
+    termBtn.setAttribute("aria-expanded", "true");
+    body.scrollTop = body.scrollHeight;
+    setTimeout(() => input.focus({ preventScroll: true }), 60);
+  }
+  function closeTerm() {
+    if (term.hidden) return;
+    term.classList.remove("open");
+    termBtn.setAttribute("aria-expanded", "false");
+    setTimeout(() => { if (!term.classList.contains("open")) term.hidden = true; }, reduceMotion ? 0 : 220);
+    if (term.contains(document.activeElement)) termBtn.focus({ preventScroll: true });
+  }
+  termBtn.addEventListener("click", () => (term.hidden ? openTerm() : closeTerm()));
+  $("term-hint").addEventListener("click", openTerm);
+  $("term-close").addEventListener("click", closeTerm);
+  commands.exit = commands.logout = () => { print("logout"); setTimeout(closeTerm, 300); };
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape" && !term.hidden && !document.querySelector("dialog[open]")) return closeTerm();
+    if (ev.key !== "`" || ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    const t = ev.target;
+    const typing = t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+    if (typing && t !== input) return;
+    ev.preventDefault();
+    term.hidden ? openTerm() : closeTerm();
+  });
+
+  /* ---------- Hero showcase ---------- */
+  const shots = (S.showcase || []).filter((x) => x && x.src);
+  if (shots.length) {
+    const frame = $("showcase-frame"), cap = $("showcase-text"), dots = $("showcase-dots");
+    $("showcase").hidden = false;
+    let cur = 0, timer = null, swiped = false;
+    const slides = shots.map((x, i) => {
+      const proj = x.project && S.projects.find((p) => p.title === x.project);
+      const b = el("button", { type: "button", class: "slide" + (x.kind === "phone" ? " is-phone" : "") + (i === 0 ? " on" : ""),
+          "aria-label": (x.alt || "Project image") + (proj ? ", open " + proj.title : ""), tabindex: i === 0 ? "0" : "-1" },
+        el("img", { src: x.src, alt: "", loading: i === 0 ? "eager" : "lazy", decoding: "async" }));
+      b.addEventListener("click", () => { if (swiped) return; if (proj) go(slug(proj.title)); });
+      frame.append(b);
+      return { el: b, data: x, proj };
+    });
+    const dotEls = shots.length > 1 ? shots.map((x, i) => {
+      const d = el("button", { type: "button", class: "dot", "aria-label": "Show image " + (i + 1) + " of " + shots.length });
+      d.addEventListener("click", () => { show(i); restart(); });
+      dots.append(d);
+      return d;
+    }) : [];
+    function show(i) {
+      cur = (i + slides.length) % slides.length;
+      slides.forEach((s2, n) => { s2.el.classList.toggle("on", n === cur); s2.el.tabIndex = n === cur ? 0 : -1; });
+      dotEls.forEach((d, n) => d.setAttribute("aria-current", String(n === cur)));
+      const sl = slides[cur];
+      cap.textContent = "";
+      cap.append(el("span", { text: sl.data.caption || sl.data.alt || "" }));
+      if (sl.proj) {
+        const a = el("a", { href: "#" + slug(sl.proj.title), class: "showcase-link", text: "See project →" });
+        a.addEventListener("click", (ev) => { ev.preventDefault(); go(slug(sl.proj.title)); });
+        cap.append(" ", a);
+      }
+    }
+    function restart() {
+      clearInterval(timer);
+      if (!reduceMotion && slides.length > 1) timer = setInterval(() => show(cur + 1), 5000);
+    }
+    // swipe left/right on phones (and drag with a mouse) to change images
+    let sx = null, sy = null;
+    frame.addEventListener("pointerdown", (ev) => { sx = ev.clientX; sy = ev.clientY; swiped = false; });
+    frame.addEventListener("pointerup", (ev) => {
+      if (sx === null) return;
+      const dx = ev.clientX - sx, dy = ev.clientY - sy;
+      sx = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { swiped = true; show(cur + (dx < 0 ? 1 : -1)); restart(); setTimeout(() => { swiped = false; }, 50); }
+    });
+    frame.addEventListener("pointercancel", () => { sx = null; });
+    $("showcase").addEventListener("mouseenter", () => clearInterval(timer));
+    $("showcase").addEventListener("mouseleave", restart);
+    $("showcase").addEventListener("focusin", () => clearInterval(timer));
+    show(0); restart();
+  }
+
+  /* ---------- Phone-only dropdowns ---------- */
+  const phone = window.matchMedia("(max-width: 760px)");
+  function syncCollapses() {
+    document.querySelectorAll(".m-collapse").forEach((d) => { d.open = !phone.matches; });
+    if (phone.matches) document.querySelectorAll(".more-detail").forEach((d) => { d.open = true; });
+  }
+  syncCollapses();
+  (phone.addEventListener ? phone.addEventListener("change", syncCollapses) : phone.addListener(syncCollapses));
 })();

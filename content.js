@@ -26,7 +26,9 @@
 
 const SITE = {
   name: "Parker Jones",
-  headline: "ECE + Computer Science at Duke.",
+  // Small label above your name.
+  eyebrow: "Duke University \u00b7 Class of 2029",
+  headline: "Electrical & Computer Engineering + Computer Science",
   intro:
     "I build across the whole stack: firmware and sensor hardware, mechanical parts cut on a CNC mill, and the apps and backends that sit on top. Here's what I've made so far.",
   location: "Tampa, FL",
@@ -35,6 +37,30 @@ const SITE = {
   photo: { src: "images/parker.jpg", alt: "Parker Jones" },
   // One line under the intro saying what you're looking for. Leave "" to hide it.
   availability: "Looking for Summer 2027 internships in embedded systems, firmware, hardware and software.",
+
+  // Short tags under the intro for the kinds of work you want to do.
+  focus: ["Embedded systems", "Firmware", "Hardware bring-up", "Full-stack apps"],
+
+  // The rotating images beside your intro at the top of the page. Each one links
+  // to its project (project: the project's title). Put your best visuals here,
+  // e.g. a photo of the wristband prototype once you have one:
+  //   { src: "images/wristband.jpg", alt: "...", caption: "...", project: "Scissor-Lift Object Detection System" },
+  // Mark tall phone screenshots with kind: "phone". Use [] to hide the showcase.
+  showcase: [
+    { src: "images/pivot-web-home.webp", alt: "Pivot web app home screen", caption: "Pivot: the week's games and the one that matters most", project: "Pivot" },
+    { src: "images/pivot-ios-board.webp", kind: "phone", alt: "Pivot iOS board screen", caption: "Pivot on iOS, built with React Native (Expo)", project: "Pivot" },
+    { src: "images/pivot-web-watchlist.webp", alt: "Pivot watchlist table", caption: "Pivot: every player, bet and pool, with where to watch", project: "Pivot" },
+  ],
+
+  // The "at a glance" boxes under the intro, so a recruiter gets the key facts in
+  // five seconds. Edit, reorder or delete any of them. {projects} is replaced
+  // with how many projects are listed below.
+  facts: [
+    { value: "ECE + CS", label: "Double major" },
+    { value: "3.925", label: "GPA" },
+    { value: "May 2029", label: "Graduation" },
+    { value: "Summer 2027", label: "Internship" },
+  ],
 
   contact: {
     email: "parker.t.jones07@gmail.com",
