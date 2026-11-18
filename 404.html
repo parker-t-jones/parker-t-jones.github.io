@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Page not found · Parker Jones</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#fafaf8">
+  <!-- GitHub Pages serves this file for any missing URL, so paths start with "/" -->
+  <script src="/themes.js"></script>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Martian+Mono:wdth,wght@75..112.5,300..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .nf { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: 80px var(--gutter) 40px; }
+    .nf-inner { width: 100%; max-width: 620px; min-width: 0; }
+    .nf-term { white-space: pre-wrap; word-break: break-word; }
+    .nf h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); letter-spacing: -0.035em; }
+    .nf-lead { margin: 14px 0 0; font-size: 1.12rem; }
+    .nf-term { margin-top: 28px; padding: 16px 18px; border-radius: 12px; background: var(--term-bg); color: var(--term-text);
+      font-family: var(--mono); font-variation-settings: "wdth" 87.5; font-size: 13px; line-height: 1.7; overflow-x: auto;
+      box-shadow: 0 24px 50px -28px rgba(10, 12, 16, 0.55); }
+    .nf-term .ps1 { color: var(--term-ok); font-weight: 600; }
+    .nf-term .err { color: #ff8b80; }
+    .nf-term .dim { color: var(--term-dim); }
+    .nf .contact-row { margin-top: 28px; }
+    .nf-brand { position: absolute; top: 18px; left: var(--gutter); }
+  </style>
+</head>
+<body>
+  <a class="brand nf-brand" href="/"><span class="brand-mark" aria-hidden="true">PJ</span><span class="brand-name">Parker Jones</span></a>
+  <main class="nf">
+    <div class="nf-inner">
+      <p class="eyebrow">Error 404</p>
+      <h1>This page doesn't exist.</h1>
+      <p class="nf-lead">The link may be old or mistyped. Everything lives on the home page.</p>
+      <pre class="nf-term" aria-label="Terminal output"><span class="ps1">parker@duke:~$</span> cd <span id="nf-path">/missing-page</span>
+<span class="err">cd: no such file or directory</span>
+<span class="ps1">parker@duke:~$</span> ls
+<span class="dim">projects/  experience/  education/  skills/  contact/</span></pre>
+      <div class="contact-row">
+        <a class="btn btn-primary" href="/">Go to the home page</a>
+        <a class="btn" href="/#work">See projects</a>
+        <a class="btn" href="/#contact">Contact</a>
+      </div>
+    </div>
+  </main>
+  <script>
+    var p = decodeURIComponent(location.pathname || "/");
+    document.getElementById("nf-path").textContent = p.length > 60 ? p.slice(0, 57) + "…" : p;
+  </script>
+</body>
+</html>
