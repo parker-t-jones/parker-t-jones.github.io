@@ -3,18 +3,48 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Parker Jones</title>
-  <meta name="description" content="Parker Jones: Electrical & Computer Engineering and Computer Science at Duke. Embedded systems, firmware, hardware and software projects.">
+  <title>Parker Jones · Duke ECE + CS · Embedded &amp; Firmware</title>
+  <meta name="description" content="Parker Jones: Electrical & Computer Engineering and Computer Science at Duke (Class of 2029). Embedded systems, firmware, hardware and software projects. Open to Summer 2027 internships.">
+  <meta name="author" content="Parker Jones">
   <meta name="theme-color" content="#fafaf8">
+  <link rel="canonical" href="https://parker-t-jones.github.io/">
 
-  <meta property="og:type" content="website">
+  <!-- link previews (LinkedIn, iMessage, Slack, X). Bump ?v= when you change og-card.png so sites re-fetch it -->
+  <meta property="og:type" content="profile">
+  <meta property="og:site_name" content="Parker Jones">
   <meta property="og:url" content="https://parker-t-jones.github.io/">
-  <meta property="og:title" content="Parker Jones">
-  <meta property="og:description" content="ECE + Computer Science at Duke. Embedded systems, firmware, hardware and software projects.">
-  <meta property="og:image" content="https://parker-t-jones.github.io/images/og-card.png">
+  <meta property="og:title" content="Parker Jones · Duke ECE + CS">
+  <meta property="og:description" content="Embedded systems, firmware, hardware and software projects. Open to Summer 2027 internships.">
+  <meta property="og:image" content="https://parker-t-jones.github.io/images/og-card.png?v=2">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Parker Jones, Duke ECE + CS, Class of 2029. Open to Summer 2027 internships.">
+  <meta property="profile:first_name" content="Parker">
+  <meta property="profile:last_name" content="Jones">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Parker Jones · Duke ECE + CS">
+  <meta name="twitter:description" content="Embedded systems, firmware, hardware and software projects. Open to Summer 2027 internships.">
+  <meta name="twitter:image" content="https://parker-t-jones.github.io/images/og-card.png?v=2">
+
+  <!-- tells Google who this page is about (name, school, links) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    "url": "https://parker-t-jones.github.io/",
+    "mainEntity": {
+      "@type": "Person",
+      "name": "Parker Jones",
+      "url": "https://parker-t-jones.github.io/",
+      "image": "https://parker-t-jones.github.io/images/parker.jpg",
+      "description": "Electrical & Computer Engineering and Computer Science student at Duke University, Class of 2029.",
+      "affiliation": { "@type": "CollegeOrUniversity", "name": "Duke University", "url": "https://duke.edu" },
+      "homeLocation": { "@type": "Place", "name": "Tampa, FL" },
+      "knowsAbout": ["Embedded systems", "Firmware", "Hardware bring-up", "Arduino C++", "ESP32", "Bluetooth Low Energy", "Fusion 360", "React", "React Native", "Python", "Java"],
+      "sameAs": ["https://www.linkedin.com/in/parkerjones0525", "https://github.com/parker-t-jones"]
+    }
+  }
+  </script>
 
   <!-- color palettes; applies the saved one before anything paints -->
   <script src="themes.js"></script>
@@ -57,7 +87,7 @@
   </header>
 
   <main id="top">
-    <section class="hero" aria-labelledby="name">
+    <section class="hero" id="hero" aria-labelledby="name">
       <div class="hero-text">
         <div class="hero-id">
           <figure class="avatar" id="avatar" hidden>
@@ -77,7 +107,12 @@
         <button type="button" class="term-hint" id="term-hint"><span class="term-hint-prompt" aria-hidden="true">&gt;_</span> Prefer the command line? Open the terminal <kbd>`</kbd></button>
       </div>
 
-      <!-- rotating showcase of project images (set in content.js -> showcase) -->
+      <!-- large headshot on laptops/desktops (phones use the small one beside the name) -->
+      <figure class="portrait" id="portrait" hidden>
+        <img id="portrait-img" src="" alt="" width="291" height="382">
+      </figure>
+
+      <!-- rotating showcase of project images on phones/tablets (content.js -> showcase) -->
       <figure class="showcase" id="showcase" hidden>
         <div class="showcase-frame" id="showcase-frame"></div>
         <figcaption class="showcase-cap">

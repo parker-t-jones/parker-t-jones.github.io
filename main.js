@@ -40,7 +40,6 @@
 
   /* ---------- Header ---------- */
   const first = S.name.split(" ")[0].toLowerCase();
-  document.title = S.name;
   $("brand-name").textContent = S.name;
   $("name-text").textContent = S.name;
   $("hero-eyebrow").textContent = S.eyebrow || "";
@@ -48,6 +47,10 @@
     $("avatar-img").src = S.photo.src;
     $("avatar-img").alt = S.photo.alt || S.name;
     $("avatar").hidden = false;
+    $("portrait-img").src = S.photo.src;
+    $("portrait-img").alt = S.photo.alt || S.name;
+    $("portrait").hidden = false;
+    $("hero").classList.add("has-portrait");
   }
   $("headline").textContent = S.headline;
   $("intro").textContent = S.intro;

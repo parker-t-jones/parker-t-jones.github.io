@@ -617,3 +617,43 @@ body, .topbar, .pane.feat, .log-entry, .edu-card, .yaml-row, .listing, .fact, .b
   .yaml .m-collapse > summary b { color: var(--ink); }
   .yaml .m-collapse[open] ul { padding: 12px 2px 6px; }
 }
+
+/* ---------- Laptop/desktop hero: big portrait, no screenshot showcase ---------- */
+.portrait { display: none; margin: 0; }
+@media (min-width: 961px) {
+  .hero.has-portrait { grid-template-columns: minmax(0, 1fr) auto; gap: 72px; align-items: center; }
+  .hero.has-portrait .avatar { display: none; }
+  .hero.has-portrait .showcase { display: none; }
+  .hero.has-portrait .hero-id { display: block; }
+  .hero.has-portrait h1 { font-size: clamp(3.4rem, 6.2vw, 5.4rem); }
+  .portrait {
+    display: block; position: relative; width: clamp(260px, 25vw, 320px); margin-right: 14px;
+  }
+  .portrait::before {
+    content: ""; position: absolute; inset: 0; transform: translate(16px, 16px);
+    border-radius: 22px; border: 2px solid var(--accent); opacity: 0.55; transition: transform .35s ease;
+  }
+  .portrait::after {
+    content: ""; position: absolute; left: -26px; top: -26px; width: 110px; height: 110px; z-index: -1;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 22%, transparent) 1.5px, transparent 2px) 0 0 / 12px 12px;
+  }
+  .portrait img {
+    position: relative; width: 100%; height: auto; aspect-ratio: 291 / 382; object-fit: cover;
+    border-radius: 22px; border: 1px solid var(--line); box-shadow: var(--shadow-lift); background: var(--card);
+    transition: transform .35s ease;
+  }
+  .portrait:hover img { transform: translate(-4px, -4px); }
+  .portrait:hover::before { transform: translate(20px, 20px); }
+}
+@media (min-width: 961px) and (prefers-reduced-motion: reduce) { .portrait img, .portrait::before { transition: none; } }
+
+/* ---------- Tablet widths: keep the top bar on one line ---------- */
+.btn { white-space: nowrap; }
+@media (min-width: 761px) and (max-width: 1100px) {
+  .brand-name, .term-toggle-label { display: none; }
+  .term-toggle { padding: 0 11px; }
+  #nav a { padding: 6px 9px; }
+}
+@media (min-width: 761px) and (max-width: 960px) {
+  .showcase { max-width: 620px; }
+}

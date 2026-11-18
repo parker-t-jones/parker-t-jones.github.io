@@ -53,3 +53,10 @@ From this folder run `python3 -m http.server` and visit http://localhost:8000.
 ## On phones
 
 Project write-ups, coursework and skill groups fold into tap-to-open dropdowns, and project photos (plus the showcase at the top) swipe sideways. On wider screens everything stays open.
+
+## Link previews, search and the 404 page
+
+- **`images/og-card.png`** is the picture shown when the site is shared on LinkedIn, iMessage, Slack, etc. It matches the site design. If you replace it, bump `?v=2` to `?v=3` in the two `og-card.png` lines in `index.html` so those sites fetch the new one. LinkedIn caches previews; paste your URL into the LinkedIn Post Inspector to refresh it.
+- The `<script type="application/ld+json">` block in `index.html` tells Google your name, school and LinkedIn/GitHub. Update it if those change.
+- **`404.html`** is shown for any mistyped URL. It uses the same styles and the visitor's palette.
+- On laptops the headshot shows large beside your intro; on phones it's the small one next to your name. For a sharper laptop photo, replace `images/parker.jpg` with a larger version (at least ~650 px wide).
